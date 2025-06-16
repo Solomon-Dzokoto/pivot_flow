@@ -1,0 +1,26 @@
+{
+  "canisters": {
+    "PivotFlow_backend": {
+      "main": "src/PivotFlow_backend/main.mo",
+      "type": "motoko"
+    },
+    "PivotFlow_frontend": {
+      "dependencies": [
+        "PivotFlow_backend"
+      ],
+      "source": [
+        "src/PivotFlow_frontend/dist"
+      ],
+      "type": "assets",
+      "workspace": "PivotFlow_frontend"
+    }
+  },
+  "defaults": {
+    "build": {
+      "args": "",
+      "packtool": ""
+    }
+  },
+  "output_env_file": ".env",
+  "version": 1
+}

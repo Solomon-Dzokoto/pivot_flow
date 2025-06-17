@@ -1,3 +1,104 @@
+type WalletAddress = 
+ record {
+   address: text;
+   blockchain: text;
+   createdAt: Time;
+   id: text;
+   name: opt text;
+   owner: Principal;
+ };
+type User = 
+ record {
+   createdAt: Time;
+   isOperator: bool;
+   lastLogin: Time;
+   "principal": Principal;
+ };
+type Time = int;
+type PriorityTier = 
+ variant {
+   fast;
+   slow;
+   standard;
+ };
+type Principal = principal;
+type NetworkFee = 
+ record {
+   blockchain: text;
+   fast: FeeInfo;
+   icon: text;
+   lastUpdated: Time;
+   slow: FeeInfo;
+   standard: FeeInfo;
+ };
+type NFTAlert = 
+ record {
+   alertType: AlertType;
+   collectionName: text;
+   collectionSlug: text;
+   createdAt: Time;
+   currency: text;
+   currentFloorPrice: float64;
+   gasLimit: opt nat;
+   id: text;
+   isActive: bool;
+   lastChecked: Time;
+   percentageChange: opt float64;
+   targetPrice: float64;
+   userId: Principal;
+ };
+type GasAlert = 
+ record {
+   blockchain: text;
+   createdAt: Time;
+   id: text;
+   isActive: bool;
+   maxGwei: nat;
+   priorityTier: PriorityTier;
+   userId: Principal;
+ };
+type FeeInfo = 
+ record {
+   gwei: float64;
+   usd: float64;
+ };
+type AlertType = 
+ variant {
+   any_change;
+   drop_below;
+   rise_above;
+ };
+type ActivityType = 
+ variant {
+   gas_alert;
+   nft_alert;
+   portfolio_update;
+ };
+type ActivityItem = 
+ record {
+   activityType: ActivityType;
+   blockchain: opt text;
+   id: text;
+   message: text;
+   timestamp: Time;
+   userId: Principal;
+ };
 service : {
-  greet: (name: text) -> (text) query;
+  addWalletAddress: (address: text, blockchain: text, name: opt text) ->
+   (WalletAddress);
+  createGasAlert: (blockchain: text, maxGwei: nat, priorityTier:
+   PriorityTier) -> (GasAlert);
+  createNFTAlert: (collectionSlug: text, collectionName: text, targetPrice:
+   float64, currency: text, alertType: AlertType, gasLimit: opt nat,
+   percentageChange: opt float64) -> (NFTAlert);
+  getCycles: () -> (nat);
+  getNetworkFees: () -> (vec NetworkFee) query;
+  getUser: () -> (opt User);
+  getUserActivities: () -> (vec ActivityItem);
+  getUserGasAlerts: () -> (vec GasAlert);
+  getUserNFTAlerts: () -> (vec NFTAlert);
+  getUserWallets: () -> (vec WalletAddress);
+  register: () -> (User);
+  updateNetworkFees: (blockchain: text, icon: text, fast: FeeInfo, standard:
+   FeeInfo, slow: FeeInfo) -> (NetworkFee);
 }

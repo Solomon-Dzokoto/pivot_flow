@@ -71,7 +71,7 @@ export const LoginPage: React.FC = () => {
               <Rocket className="w-8 h-8 text-white" />
             </div>
             <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
-              ZeroFee NFT Alerts
+              PivotFlow
             </h1>
           </div>
           <p className="text-slate-400 text-sm md:text-base">
@@ -149,7 +149,7 @@ export const LoginPage: React.FC = () => {
         {/* Footer */}
         <footer className="p-6 text-center border-t border-slate-700/50">
           <p className="text-slate-500 text-sm">
-            © 2025 ZeroFee NFT Alerts • Powered by Internet Computer Protocol
+            © 2025 PivotFlow • Powered by Internet Computer Protocol
           </p>
         </footer>
       </div>

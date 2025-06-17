@@ -7,7 +7,7 @@ import {
   _SERVICE,
   idlFactory,
   canisterId as defaultCanisterId 
-} from '../declarations/zerofee_nft_alerts';
+} from '../declarations/PivotFlow_backend';
 
 // Types for our application
 export interface CanisterService extends _SERVICE {}

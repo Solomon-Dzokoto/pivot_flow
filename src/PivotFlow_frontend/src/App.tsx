@@ -86,7 +86,7 @@ const AppContent: React.FC = () => {
               </div>
               <div>
                 <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
-                  ZeroFee NFT Alerts
+                  PivotFlow
                 </h1>
                 <p className="text-slate-400 text-sm">
                   Your mission control for NFT monitoring and cross-chain fee optimization
@@ -110,7 +110,7 @@ const AppContent: React.FC = () => {
         {/* Footer */}
         <footer className="p-6 text-center border-t border-slate-700/50">
           <p className="text-slate-500 text-sm">
-            © 2025 ZeroFee NFT Alerts • Powered by Internet Computer Protocol
+            © 2025 PivotFlow • Powered by Internet Computer Protocol
           </p>
         </footer>
       </div>

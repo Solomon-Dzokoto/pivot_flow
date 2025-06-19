@@ -7,9 +7,9 @@
   line-height: 1.5;
   font-weight: 400;
 
-  color-scheme: dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #0D0D1A;
+  color-scheme: dark; /* Ensures dark mode for browser UI like scrollbars if not styled */
+  /* color: rgba(255, 255, 255, 0.87); Default text color will be set by --foreground */
+  /* background-color: #0D0D1A; Default background will be set by --background */
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -21,7 +21,8 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  background: linear-gradient(135deg, #0D0D1A 0%, #1A0A2D 50%, #2E0A4E 100%);
+  /* background: linear-gradient(135deg, #0D0D1A 0%, #1A0A2D 50%, #2E0A4E 100%); */
+  /* Background will be applied via @apply bg-background in the @layer base below */
 }
 
 /* Custom animations */
@@ -76,58 +77,58 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(51, 65, 85, 0.3);
+  background: hsl(var(--secondary) / 0.5); /* Using theme colors */
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(6, 182, 212, 0.6);
+  background: hsl(var(--accent) / 0.6); /* Using theme colors */
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(6, 182, 212, 0.8);
+  background: hsl(var(--accent) / 0.8); /* Using theme colors */
 }
 
-/* Slider thumb styling */
+/* Slider thumb styling - update to use theme accent */
 .slider::-webkit-slider-thumb {
   appearance: none;
   height: 20px;
   width: 20px;
   border-radius: 50%;
-  background: rgb(6 182 212);
+  background: hsl(var(--accent));
   cursor: pointer;
-  box-shadow: 0 0 10px rgba(6, 182, 212, 0.5);
+  box-shadow: 0 0 10px hsl(var(--accent) / 0.5);
 }
 
 .slider::-moz-range-thumb {
   height: 20px;
   width: 20px;
   border-radius: 50%;
-  background: rgb(6 182 212);
+  background: hsl(var(--accent));
   cursor: pointer;
   border: none;
-  box-shadow: 0 0 10px rgba(6, 182, 212, 0.5);
+  box-shadow: 0 0 10px hsl(var(--accent) / 0.5);
 }
 
-/* Enhance focus states */
+/* Enhance focus states - update to use theme accent */
 button:focus-visible,
 input:focus-visible,
 select:focus-visible {
-  outline: 2px solid rgb(6 182 212);
+  outline: 2px solid hsl(var(--accent));
   outline-offset: 2px;
 }
 
-/* Subtle glow effects */
+/* Subtle glow effects - these can be kept or adapted later */
 .shadow-glow-cyan {
-  box-shadow: 0 0 20px rgba(6, 182, 212, 0.3);
+  box-shadow: 0 0 20px hsl(var(--accent) / 0.3);
 }
 
-.shadow-glow-purple {
+.shadow-glow-purple { /* This color isn't in our defined palette, can be adjusted if used */
   box-shadow: 0 0 20px rgba(147, 51, 234, 0.3);
 }
 
-.shadow-glow-pink {
+.shadow-glow-pink { /* This color isn't in our defined palette, can be adjusted if used */
   box-shadow: 0 0 20px rgba(236, 72, 153, 0.3);
 }
 
@@ -141,39 +142,101 @@ select:focus-visible {
 
 @layer base {
   :root {
-    --background: 0 0% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 0 0% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 0 0% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 0 0% 9%;
-    --secondary: 0 0% 14.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 14.9%;
-    --muted-foreground: 0 0% 63.9%;
-    --accent: 0 0% 14.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 14.9%;
-    --input: 0 0% 14.9%;
-    --ring: 0 0% 83.1%;
+    /* Light Theme HSL Variables (default) */
+    --background: 0 0% 100%; /* white */
+    --foreground: 224 71.4% 4.1%; /* slate-950 */
+
+    --card: 0 0% 98%; /* slate-50 */
+    --card-foreground: 224 71.4% 4.1%; /* slate-950 */
+
+    --popover: 0 0% 98%; /* slate-50 */
+    --popover-foreground: 224 71.4% 4.1%; /* slate-950 */
+
+    --primary: 180 90% 40%; /* cyan-600 (adjusted for more saturation) */
+    --primary-foreground: 180 100% 96%; /* cyan-50 (light text on primary) */
+
+    --secondary: 220 13.0% 90.8%; /* slate-200 */
+    --secondary-foreground: 224 71.4% 4.1%; /* slate-950 */
+
+    --muted: 220 13.0% 90.8%; /* slate-200 */
+    --muted-foreground: 220 8.9% 43.1%; /* slate-600 */
+
+    --accent: 180 90% 40%; /* cyan-600 */
+    --accent-foreground: 180 100% 96%; /* cyan-50 */
+
+    --destructive: 0 84.2% 60.2%; /* red-500 */
+    --destructive-foreground: 0 0% 98%; /* slate-50 (text on destructive) */
+
+    --border: 220 13.0% 83.9%; /* slate-300 */
+    --input: 220 13.0% 94.9%; /* slate-100 (slightly lighter for input bg) */
+    --ring: 180 90% 40%; /* cyan-600 (focus ring) */
+
+    --radius: 0.5rem;
+
+    /* Animated Gradient Colors - Light Theme */
+    --gradient-color-1: 0 0% 100%; /* white */
+    --gradient-color-2: 220 13.0% 90.8%; /* slate-200 */
+    --gradient-color-3: 220 13.0% 83.9%; /* slate-300 */
+
+    /* Chart colors (can be kept or adjusted per theme) */
     --chart-1: 220 70% 50%;
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
-    --radius: 0.5rem;
+
+    /* Neon Glow Colors - Light Theme (subtle or off) */
+    --neon-glow-color-1: 220 10% 40% / 0.1; /* Very subtle dark slate blue shadow */
+    --neon-glow-color-2: 220 10% 30% / 0.1; /* Even more subtle */
+  }
+
+  .dark {
+    /* Dark Theme HSL Variables */
+    --background: 222.2 47.4% 11.2%; /* #0F172A slate-900 */
+    --foreground: 210 28.6% 83.5%; /* #CBD5E1 slate-300 */
+
+    --card: 215.4 39.3% 17.1%; /* #1E293B slate-800 */
+    --card-foreground: 210 28.6% 83.5%; /* #CBD5E1 slate-300 */
+
+    --popover: 215.4 39.3% 17.1%; /* #1E293B slate-800 */
+    --popover-foreground: 210 28.6% 83.5%; /* #CBD5E1 slate-300 */
+
+    --primary: 180 100% 50%; /* #00FFFF Cyan */
+    --primary-foreground: 222.2 47.4% 11.2%; /* #0F172A slate-900 */
+
+    --secondary: 215.4 25.2% 26.7%; /* #334155 slate-700 */
+    --secondary-foreground: 210 28.6% 83.5%; /* #CBD5E1 slate-300 */
+
+    --muted: 215.4 39.3% 17.1%; /* #1E293B slate-800 */
+    --muted-foreground: 215.3 19.3% 65.3%; /* #94A3B8 slate-400 */
+
+    --accent: 180 100% 50%; /* #00FFFF Cyan */
+    --accent-foreground: 222.2 47.4% 11.2%; /* #0F172A slate-900 */
+
+    --destructive: 0 72.2% 50.6%; /* red-600 (slightly darker for dark mode) */
+    --destructive-foreground: 0 0% 98%; /* slate-50 */
+
+    --border: 215.4 25.2% 26.7%; /* #334155 slate-700 */
+    --input: 215.4 25.2% 26.7%; /* #334155 slate-700 */
+    --ring: 180 100% 50%; /* #00FFFF Cyan */
+
+    /* Animated Gradient Colors - Dark Theme */
+    --gradient-color-1: 222.2 47.4% 11.2%; /* --background dark */
+    --gradient-color-2: 222.2 47.4% 15.2%; /* Darker shade of --background dark */
+    --gradient-color-3: 215.4 39.3% 17.1%; /* --card dark */
+
+    /* Neon Glow Colors - Dark Theme (vibrant) */
+    --neon-glow-color-1: 180 100% 50%; /* Cyan (theme-glow-start) */
+    --neon-glow-color-2: 195 100% 60%; /* Lighter/variant blue (theme-glow-end) */
   }
 }
 
 @layer base {
   * {
-    @apply border-border;
+    @apply border-border; /* Uses the --border HSL var */
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground; /* Uses --background and --foreground HSL vars */
+    font-family: 'Inter', system-ui, sans-serif; /* Ensure Inter font is primary */
   }
 }

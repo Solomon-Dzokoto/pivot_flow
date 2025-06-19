@@ -41,12 +41,14 @@ export interface NetworkFee {
 }
 
 export interface NFTItem {
-  id: string;
+  id: string; // Unique ID for the NFT item itself (e.g., principal_tokenid)
+  collectionSlug: string; // For API calls, e.g., "boredapeyachtclub"
   collectionName: string;
-  tokenId: string;
+  tokenId?: string; // Some NFTs might be collection offers, not specific tokens
   imageUrl: string;
-  floorPrice: number;
-  currency: string;
+  // floorPrice: number; // This will now be fetched dynamically, remove from static item data
+  currency: string; // Default currency for display, e.g. ETH, SOL
+  blockchain: string; // e.g., "Ethereum", "Solana"
   marketplaceUrl: string;
 }
 
@@ -120,8 +122,18 @@ interface AppContextType {
   setError: (error: string | null) => void;
   
   // Canister Info (for operator)
-  canisterCycles: number;
+  canisterCycles: bigint | null;
+  canisterMemory: bigint | null;
+  icpPrice: number | null;
+  tokenPrices: Record<string, number | null>;
+  isLoadingTokenPrices: boolean;
+  nftFloorPrices: Record<string, { price: number | null; isLoading: boolean; error?: string }>; // For NFT floor prices
   isOperator: boolean;
+  fetchCanisterCycles: () => Promise<void>;
+  fetchCanisterMemory: () => Promise<void>;
+  fetchICPPrice: () => Promise<void>;
+  fetchTokenPrices: (tokenIds: string[]) => Promise<void>;
+  fetchNftFloorPrice: (collectionSlug: string, blockchain: string) => Promise<void>; // New fetcher
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -194,23 +206,35 @@ const mockNetworkFees: NetworkFee[] = [
 
 const mockNftPortfolio: NFTItem[] = [
   {
-    id: '1',
+    id: 'coolcats_1337',
+    collectionSlug: 'cool-cats', // Example slug
     collectionName: 'Cool Cats',
     tokenId: '#1337',
-    imageUrl: 'https://placehold.co/150x150/0D0D1A/00F0FF?text=NFT',
-    floorPrice: 2.5,
+    imageUrl: 'https://i.seadn.io/gcs/files/2aूं918DMACI9ERW_sfZ33J9F4BPS_ADhJ0xYd9705s/cool%20cats%20nft.jpg?auto=format&dpr=1&w=384', // Example real image
     currency: 'ETH',
-    marketplaceUrl: '#',
+    blockchain: 'Ethereum',
+    marketplaceUrl: 'https://opensea.io/collection/cool-cats-nft',
   },
   {
-    id: '2',
+    id: 'doodles_4269',
+    collectionSlug: 'doodles-official', // Example slug
     collectionName: 'Doodles',
     tokenId: '#4269',
-    imageUrl: 'https://placehold.co/150x150/0D0D1A/FF00FF?text=NFT',
-    floorPrice: 1.8,
+    imageUrl: 'https://i.seadn.io/gcs/files/1a659012c323db0997900afa04169186.gif?auto=format&dpr=1&w=384', // Example real image
     currency: 'ETH',
-    marketplaceUrl: '#',
+    blockchain: 'Ethereum',
+    marketplaceUrl: 'https://opensea.io/collection/doodles-official',
   },
+  {
+    id: 'degods_123',
+    collectionSlug: 'degods', // Example slug for a Solana collection
+    collectionName: 'DeGods',
+    tokenId: '#123',
+    imageUrl: 'https://img-cdn.magiceden.dev/rs:fill:400:400:0:0/plain/https://bafybeidhz29vlpp5aukqtoz4ulo52acvrz2pyk5tq43t6u7b75xosbyrpu.ipfs.nftstorage.link/', // Example real image
+    currency: 'SOL',
+    blockchain: 'Solana',
+    marketplaceUrl: 'https://magiceden.io/marketplace/degods',
+  }
 ];
 
 const mockActivity: ActivityItem[] = [
@@ -245,8 +269,14 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [recentActivity, setRecentActivity] = useState<ActivityItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [canisterCycles] = useState(1200000000000); // 1.2 Trillion
-  const [isOperator] = useState(true); // Mock operator status
+  // Canister Info State
+  const [canisterCycles, setCanisterCycles] = useState<bigint | null>(null);
+  const [canisterMemory, setCanisterMemory] = useState<bigint | null>(null);
+  const [icpPrice, setIcpPrice] = useState<number | null>(null);
+  const [tokenPrices, setTokenPrices] = useState<Record<string, number | null>>({});
+  const [isLoadingTokenPrices, setIsLoadingTokenPrices] = useState<boolean>(false);
+  const [nftFloorPrices, setNftFloorPrices] = useState<Record<string, { price: number | null; isLoading: boolean; error?: string }>>({});
+  const [isOperator] = useState(true); // Mock operator status, can be fetched later
 
   const [settings, setSettings] = useState<AppSettings>({
     apiKeys: {
@@ -274,13 +304,19 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   useEffect(() => {
     let isMounted = true;
 
-    const loadData = async () => {
-      if (isAuthenticated && principal) {
+    const loadInitialData = async () => {
+      if (isAuthenticated && principal && isMounted) {
         try {
           setIsLoading(true);
-          // Load user-specific data from ICP canister
+          // Load user-specific data
           await loadUserData();
-          if (isMounted) {
+
+          // Load canister/global data
+          await fetchCanisterCycles();
+          await fetchCanisterMemory();
+          await fetchICPPrice();
+
+          if (isMounted) { // Re-check isMounted after async operations
             addActivity({
               type: 'portfolio_update',
               message: `Welcome back! Logged in with principal: ${principal?.slice(0, 8)}...`,
@@ -288,7 +324,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
             });
           }
         } catch (error) {
-          console.error('Failed to load user data:', error);
+          console.error('Failed to load initial data:', error);
           if (isMounted) {
             setError('Failed to load user data');
           }
@@ -297,41 +333,38 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
             setIsLoading(false);
           }
         }
-      } else {
-        // Clear user data when not authenticated
+      } else if (isMounted) { // Clear data if not authenticated
         clearUserData();
+        setCanisterCycles(null);
+        setCanisterMemory(null);
+        setIcpPrice(null);
       }
     };
 
-    loadData();
+    loadInitialData();
 
     return () => {
       isMounted = false;
     };
-  }, [isAuthenticated, principal]);
+  }, [isAuthenticated, principal]); // Dependencies for initial load
 
   const loadUserData = async () => {
+    // This function can remain focused on user-specific data like alerts, wallets
+    // For now, using mock data as before.
+    // setIsLoading(true); // Handled by loadInitialData
     try {
-      setIsLoading(true);
-      // TODO: Replace with actual ICP canister calls
-      // const userAlerts = await canisterActor.getUserNftAlerts(principal);
-      // const userGasAlerts = await canisterActor.getUserGasAlerts(principal);
-      // const userWallets = await canisterActor.getUserWallets(principal);
-      // const userActivity = await canisterActor.getUserActivity(principal);
-      
-      // For now, use mock data
+      // TODO: Replace with actual ICP canister calls for user data
       setNftAlerts(mockNftAlerts);
       setNftPortfolio(mockNftPortfolio);
       setRecentActivity(mockActivity);
     } catch (error) {
       console.error('Failed to load user data:', error);
       setError('Failed to load user data');
-    } finally {
-      setIsLoading(false);
     }
+    // setIsLoading(false); // Handled by loadInitialData
   };
 
-  const clearUserData = () => {
+  const clearUserData = () => { // Clears only user-specific data
     setNftAlerts([]);
     setGasAlerts([]);
     setWalletAddresses([]);
@@ -551,6 +584,75 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     }
   };
 
+  // --- New Fetcher Functions ---
+  const fetchCanisterCycles = async () => {
+    try {
+      const cycles = await canisterClient.getCycles();
+      setCanisterCycles(cycles);
+    } catch (err) {
+      console.error("Failed to fetch canister cycles:", err);
+      setError("Failed to load canister cycles.");
+      setCanisterCycles(null);
+    }
+  };
+
+  const fetchCanisterMemory = async () => {
+    try {
+      const memory = await canisterClient.getCanisterMemoryUsage();
+      setCanisterMemory(memory);
+    } catch (err) {
+      console.error("Failed to fetch canister memory:", err);
+      setError("Failed to load canister memory usage.");
+      setCanisterMemory(null);
+    }
+  };
+
+  const fetchICPPrice = async () => {
+    try {
+      const price = await canisterClient.getICPPrice();
+      setIcpPrice(price);
+    } catch (err) {
+      console.error("Failed to fetch ICP price:", err);
+      setIcpPrice(null);
+    }
+  };
+
+  const fetchTokenPrices = async (tokenIds: string[]) => {
+    if (tokenIds.length === 0) return;
+    setIsLoadingTokenPrices(true);
+    try {
+      const pricesData = await canisterClient.getAltcoinPrices(tokenIds);
+      if (pricesData) {
+        const newPrices: Record<string, number | null> = {};
+        for (const tokenPrice of pricesData) {
+          newPrices[tokenPrice.id] = tokenPrice.current_price;
+        }
+        setTokenPrices(prev => ({ ...prev, ...newPrices }));
+      } else {
+        // Handle case where backend returns null (e.g. API error)
+        tokenIds.forEach(id => setTokenPrices(prev => ({...prev, [id]: null})));
+      }
+    } catch (err) {
+      console.error("Failed to fetch altcoin prices:", err);
+      tokenIds.forEach(id => setTokenPrices(prev => ({...prev, [id]: null})));
+      // Optionally set a specific error message for token prices
+    } finally {
+      setIsLoadingTokenPrices(false);
+    }
+  };
+
+  const fetchNftFloorPrice = async (collectionSlug: string, blockchain: string) => {
+    const key = `${collectionSlug}_${blockchain}`;
+    setNftFloorPrices(prev => ({ ...prev, [key]: { price: prev[key]?.price ?? null, isLoading: true, error: undefined } }));
+    try {
+      const price = await canisterClient.getNftFloorPrice(collectionSlug, blockchain);
+      setNftFloorPrices(prev => ({ ...prev, [key]: { price: price, isLoading: false } }));
+    } catch (err) {
+      console.error(`Failed to fetch floor price for ${collectionSlug} on ${blockchain}:`, err);
+      setNftFloorPrices(prev => ({ ...prev, [key]: { price: null, isLoading: false, error: 'Failed to fetch price' } }));
+    }
+  };
+
   return (
     <AppContext.Provider
       value={{
@@ -578,7 +680,17 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         errorMessage,
         setError,
         canisterCycles,
+        canisterMemory,
+        icpPrice,
+        tokenPrices,
+        isLoadingTokenPrices,
+        nftFloorPrices, // Added
         isOperator,
+        fetchCanisterCycles,
+        fetchCanisterMemory,
+        fetchICPPrice,
+        fetchTokenPrices,
+        fetchNftFloorPrice, // Added
       }}
     >
       {children}

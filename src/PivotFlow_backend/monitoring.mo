@@ -217,7 +217,7 @@ module Monitoring {
     };
     // Gas monitoring service
     public class GasMonitor() {
-        
+
         private let ETHERSCAN_API_KEY_PLACEHOLDER = "YOUR_ETHERSCAN_API_KEY";
 
         // Helper to extract a numeric value from a JSON string, looking for a specific key.

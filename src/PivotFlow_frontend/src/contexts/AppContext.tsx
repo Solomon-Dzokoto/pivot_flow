@@ -272,13 +272,42 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   // Load user data when authenticated
   useEffect(() => {
-    if (isAuthenticated && principal) {
-      // Load user-specific data from ICP canister
-      loadUserData();
-    } else {
-      // Clear user data when not authenticated
-      clearUserData();
-    }
+    let isMounted = true;
+
+    const loadData = async () => {
+      if (isAuthenticated && principal) {
+        try {
+          setIsLoading(true);
+          // Load user-specific data from ICP canister
+          await loadUserData();
+          if (isMounted) {
+            addActivity({
+              type: 'portfolio_update',
+              message: `Welcome back! Logged in with principal: ${principal?.slice(0, 8)}...`,
+              timestamp: new Date().toISOString(),
+            });
+          }
+        } catch (error) {
+          console.error('Failed to load user data:', error);
+          if (isMounted) {
+            setError('Failed to load user data');
+          }
+        } finally {
+          if (isMounted) {
+            setIsLoading(false);
+          }
+        }
+      } else {
+        // Clear user data when not authenticated
+        clearUserData();
+      }
+    };
+
+    loadData();
+
+    return () => {
+      isMounted = false;
+    };
   }, [isAuthenticated, principal]);
 
   const loadUserData = async () => {
@@ -294,12 +323,6 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       setNftAlerts(mockNftAlerts);
       setNftPortfolio(mockNftPortfolio);
       setRecentActivity(mockActivity);
-      
-      addActivity({
-        type: 'portfolio_update',
-        message: `Welcome back! Logged in with principal: ${principal?.slice(0, 8)}...`,
-        timestamp: new Date().toISOString(),
-      });
     } catch (error) {
       console.error('Failed to load user data:', error);
       setError('Failed to load user data');
@@ -321,12 +344,15 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   useEffect(() => {
     if (!isAuthenticated) return;
 
+    let isMounted = true;
     const interval = setInterval(() => {
+      if (!isMounted) return;
+
       setNetworkFees(prev => prev.map(fee => ({
         ...fee,
         fast: { ...fee.fast, gwei: Math.max(1, fee.fast.gwei + (Math.random() - 0.5) * 10) },
-        standard: { ...fee.standard, gwei: Math.max(1, fee.standard.gwei + (Math.random() - 0.5) * 8) },
-        slow: { ...fee.slow, gwei: Math.max(1, fee.slow.gwei + (Math.random() - 0.5) * 5) },
+        standard: { ...fee.standard, gwei: Math.max(1, fee.standard.gwei + (Math.random() - 0.5) * 5) },
+        slow: { ...fee.slow, gwei: Math.max(1, fee.slow.gwei + (Math.random() - 0.5) * 2) }
       })));
       
       setNftAlerts(prev => prev.map(alert => ({
@@ -336,7 +362,10 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       })));
     }, 30000); // Update every 30 seconds
 
-    return () => clearInterval(interval);
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
   }, [isAuthenticated]);
 
   const addNftAlert = async (alert: Omit<NFTAlert, 'id' | 'lastChecked' | 'isActive'>) => {
@@ -437,6 +466,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         slow: { ...fee.slow, gwei: Math.max(1, fee.slow.gwei + (Math.random() - 0.5) * 10) },
       })));
     } catch (error) {
+      console.error('Failed to refresh network fees:', error);
       setErrorMessage('Failed to refresh network fees');
     } finally {
       setIsLoading(false);
@@ -481,6 +511,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       await new Promise(resolve => setTimeout(resolve, 2000));
       setNftPortfolio(mockNftPortfolio);
     } catch (error) {
+      console.error('Failed to refresh portfolio:', error);
       setErrorMessage('Failed to refresh portfolio');
     } finally {
       setIsLoading(false);

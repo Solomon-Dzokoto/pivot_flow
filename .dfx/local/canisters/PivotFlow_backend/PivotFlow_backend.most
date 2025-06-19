@@ -1,77 +1,77 @@
 // Version: 1.0.0
-type ActivityItem__906133181 =
+type ActivityItem__689889543 =
   {
-    activityType : ActivityType__590573572;
+    activityType : ActivityType__53741458;
     blockchain : ?Text;
     id : Text;
     message : Text;
-    timestamp : Time__576531430;
-    userId : Principal__73904461
+    timestamp : Time__503226667;
+    userId : Principal__820490442
   };
-type ActivityType__590573572 = {#gas_alert; #nft_alert; #portfolio_update};
-type AlertType__890995768 = {#any_change; #drop_below; #rise_above};
-type FeeInfo__250214618 = {gwei : Float; usd : Float};
-type GasAlert__852848304 =
+type ActivityType__53741458 = {#gas_alert; #nft_alert; #portfolio_update};
+type AlertType__1013718768 = {#any_change; #drop_below; #rise_above};
+type FeeInfo__848953149 = {gwei : Float; usd : Float};
+type GasAlert__844267404 =
   {
     blockchain : Text;
-    createdAt : Time__576531430;
+    createdAt : Time__503226667;
     id : Text;
     isActive : Bool;
     maxGwei : Nat;
-    priorityTier : PriorityTier__89870412;
-    userId : Principal__73904461
+    priorityTier : PriorityTier__1047305803;
+    userId : Principal__820490442
   };
-type NFTAlert__619773434 =
+type NFTAlert__1046765196 =
   {
-    alertType : AlertType__890995768;
+    alertType : AlertType__1013718768;
     collectionName : Text;
     collectionSlug : Text;
-    createdAt : Time__576531430;
+    createdAt : Time__503226667;
     currency : Text;
     currentFloorPrice : Float;
     gasLimit : ?Nat;
     id : Text;
     isActive : Bool;
-    lastChecked : Time__576531430;
+    lastChecked : Time__503226667;
     percentageChange : ?Float;
     targetPrice : Float;
-    userId : Principal__73904461
+    userId : Principal__820490442
   };
-type NetworkFee__136693869 =
+type NetworkFee__408940246 =
   {
     blockchain : Text;
-    fast : FeeInfo__250214618;
+    fast : FeeInfo__848953149;
     icon : Text;
-    lastUpdated : Time__576531430;
-    slow : FeeInfo__250214618;
-    standard : FeeInfo__250214618
+    lastUpdated : Time__503226667;
+    slow : FeeInfo__848953149;
+    standard : FeeInfo__848953149
   };
 type Principal__224692764 = Principal;
-type Principal__495899651 = Principal__224692764;
-type Principal__73904461 = Principal__495899651;
-type PriorityTier__89870412 = {#fast; #slow; #standard};
-type Time__576531430 = Int;
-type User__751052727 =
+type Principal__552624477 = Principal__224692764;
+type Principal__820490442 = Principal__552624477;
+type PriorityTier__1047305803 = {#fast; #slow; #standard};
+type Time__503226667 = Int;
+type User__758877302 =
   {
-    createdAt : Time__576531430;
+    createdAt : Time__503226667;
     isOperator : Bool;
-    lastLogin : Time__576531430;
-    principal : Principal__73904461
+    lastLogin : Time__503226667;
+    principal : Principal__820490442
   };
-type WalletAddress__259206279 =
+type WalletAddress__63791269 =
   {
     address : Text;
     blockchain : Text;
-    createdAt : Time__576531430;
+    createdAt : Time__503226667;
     id : Text;
     name : ?Text;
-    owner : Principal__73904461
+    owner : Principal__820490442
   };
 actor {
-  stable var activities : [(Text, ActivityItem__906133181)];
-  stable var gasAlerts : [(Text, GasAlert__852848304)];
-  stable var networkFees : [(Text, NetworkFee__136693869)];
-  stable var nftAlerts : [(Text, NFTAlert__619773434)];
-  stable var users : [(Principal, User__751052727)];
-  stable var walletAddresses : [(Text, WalletAddress__259206279)]
+  stable var activities : [(Text, ActivityItem__689889543)];
+  stable var gasAlerts : [(Text, GasAlert__844267404)];
+  stable var networkFees : [(Text, NetworkFee__408940246)];
+  stable var nftAlerts : [(Text, NFTAlert__1046765196)];
+  stable var users : [(Principal, User__758877302)];
+  stable var walletAddresses : [(Text, WalletAddress__63791269)]
 };

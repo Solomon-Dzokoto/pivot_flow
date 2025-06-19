@@ -1,5 +1,5 @@
 import { Actor, HttpAgent, Identity } from '@dfinity/agent';
-import { AuthClient } from '@dfinity/auth-client';
+// import { AuthClient } from '@dfinity/auth-client';
 import { Principal } from '@dfinity/principal';
 
 // Import the generated types and factory
@@ -7,10 +7,71 @@ import {
   _SERVICE,
   idlFactory,
   canisterId as defaultCanisterId 
-} from '../declarations/PivotFlow_backend';
+} from '../../../declarations/PivotFlow_backend';
+import { GasAlert, NetworkFee, NFTAlert, WalletAddress } from '@/contexts/AppContext';
+
+// Define UserSettings type (replace fields with actual structure if known)
+export interface UserSettings {
+  // Example fields, update as needed
+  notificationsEnabled: boolean;
+  preferredCurrency: string;
+  // Add other settings fields as needed
+}
+
+// Define UserActivity type (replace fields with actual structure if known)
+export interface UserActivity {
+  // Example fields, update as needed
+  id: string;
+  type: string;
+  timestamp: bigint;
+  details?: string;
+}
 
 // Types for our application
-export interface CanisterService extends _SERVICE {}
+export interface CanisterService extends _SERVICE {
+  me: () => Promise<Principal>;
+  whoami: () => Promise<Principal>;
+  registerUser: () => Promise<void>;
+  getUser: () => Promise<{
+    principal: Principal;
+    username: string;
+    email: string;
+    createdAt: bigint;
+  }>;
+  getUserNftAlerts: () => Promise<NFTAlert[]>;
+  addNftAlert: (
+    collectionSlug: string,
+    collectionName: string,
+    targetPrice: number,
+    currency: string,
+    alertType: { drop_below: null } | { rise_above: null } | { any_change: null },
+    gasLimit?: bigint[],
+    percentageChange?: number[]
+  ) => Promise<string>;
+  removeNftAlert: (alertId: string) => Promise<void>;
+  getUserGasAlerts: () => Promise<GasAlert[]>;
+  addGasAlert: (
+    blockchain: string,
+    maxGwei: bigint,
+    priorityTier: { fast: null } | { standard: null } | { slow: null }
+  ) => Promise<string>;
+  removeGasAlert: (alertId: string) => Promise<void>;
+  getUserWalletAddresses: () => Promise<WalletAddress[]>;
+  addWalletAddress: (
+    address: string,
+    blockchain: string,
+    label?: string[]
+  ) => Promise<string>;
+  removeWalletAddress: (walletId: string) => Promise<void>;
+  getUserActivity: (limit?: bigint[]) => Promise<UserActivity[]>;
+  getUserSettings: () => Promise<UserSettings>;
+  updateSettings: (settings: UserSettings) => Promise<void>;
+  getNetworkFees: () => Promise<NetworkFee[]>;
+  getCycles: () => Promise<bigint>;
+  health: () => Promise<boolean>;
+
+
+}
 
 export class CanisterClient {
   private static instance: CanisterClient;

@@ -1,0 +1,36 @@
+service : {
+    get_bearer : () -> (text) query;
+    http_request : (request : HttpRequest) -> (HttpResponse) query;
+    http_request_streaming_callback : (token : StreamingCallbackToken) -> (StreamingCallbackHttpResponse) query;
+    store : (arg : StoreArg) -> (StoreResult)
+}
+
+type HttpRequest = record {
+    body : blob;
+    headers : vec HeaderField;
+    method : text;
+    url : text
+};
+
+type HttpResponse = record {
+    body : blob;
+    headers : vec HeaderField;
+    status_code : nat16;
+    streaming_strategy : opt StreamingStrategy
+};
+
+type StreamingCallbackToken = record {
+    content_encoding : text;
+    index : nat;
+    key : Key
+};
+
+type StreamingCallbackHttpResponse = record {
+    body : blob;
+    token : opt StreamingCallbackToken
+};
+
+type Key = text;
+type HeaderField = record { text; text };
+type StoreArg = record { content_type : text; content : blob };
+type StoreResult = record { key : Key }

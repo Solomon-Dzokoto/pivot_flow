@@ -1,6 +1,4 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { Identity } from '@dfinity/agent';
-import { AuthClient } from '@dfinity/auth-client';
 import { authService, AuthState } from '../lib/auth';
 
 interface AuthContextType extends AuthState {
@@ -19,6 +17,13 @@ export const useAuth = () => {
   return context;
 };
 
+// Expose logout function globally for emergency use
+declare global {
+  interface Window {
+    __pivotflow_logout: () => Promise<void>;
+  }
+}
+
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [authState, setAuthState] = useState<AuthState>({
     isAuthenticated: false,
@@ -35,12 +40,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const checkAuthStatus = async () => {
     try {
       setIsLoading(true);
+      console.log('Checking auth status...');
       const isAuthenticated = await authService.isAuthenticated();
+      console.log('Auth status result:', isAuthenticated);
       
       if (isAuthenticated) {
         const identity = authService.getIdentity();
         const principal = authService.getPrincipal();
         const authClient = authService.getAuthClient();
+        console.log('User authenticated, principal:', principal?.toString());
         
         setAuthState({
           isAuthenticated: true,
@@ -49,6 +57,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           authClient,
         });
       } else {
+        console.log('User not authenticated');
         setAuthState({
           isAuthenticated: false,
           identity: null,
@@ -72,12 +81,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const login = async (): Promise<boolean> => {
     try {
       setIsLoading(true);
+      console.log('Starting login process...');
       const success = await authService.login();
+      console.log('Login result:', success);
       
       if (success) {
         const identity = authService.getIdentity();
         const principal = authService.getPrincipal();
         const authClient = authService.getAuthClient();
+        console.log('Login successful, principal:', principal?.toString());
         
         setAuthState({
           isAuthenticated: true,
@@ -87,6 +99,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         });
         return true;
       }
+      console.log('Login unsuccessful');
       return false;
     } catch (error) {
       console.error('Login failed:', error);
@@ -106,12 +119,20 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         principal: null,
         authClient: null,
       });
+      console.log('Successfully logged out');
+      // Force reload the page after logout
+      window.location.reload();
     } catch (error) {
-      console.error('Logout failed:', error);
+      console.error('Logout failed:', error)
     } finally {
       setIsLoading(false);
     }
   };
+
+  // Expose the logout function globally
+  useEffect(() => {
+    window.__pivotflow_logout = logout;
+  }, []);
 
   return (
     <AuthContext.Provider

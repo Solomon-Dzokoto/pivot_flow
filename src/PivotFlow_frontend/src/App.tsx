@@ -1,6 +1,7 @@
 import React from 'react';
 import { AuthProvider } from './contexts/AuthContext';
 import { AppProvider, useAppContext } from './contexts/AppContext';
+import { NotificationProvider } from './contexts/NotificationContext';
 import { useAuth } from './contexts/AuthContext';
 import { CosmicBackground } from './components/CosmicBackground';
 import { ErrorToast } from './components/ErrorToast';
@@ -11,6 +12,7 @@ import { NftAlertsPage } from './components/pages/NftAlertsPage';
 import { BlockchainFeesPage } from './components/pages/BlockchainFeesPage';
 import { PortfolioPage } from './components/pages/PortfolioPage';
 import { SettingsPage } from './components/pages/SettingsPage';
+import { Toaster } from 'sonner';
 import { BarChart3, Bell, Zap, Eye, Settings, Rocket } from 'lucide-react';
 
 const Navigation: React.FC = () => {
@@ -46,9 +48,45 @@ const Navigation: React.FC = () => {
   );
 };
 
+function App() {
+  return (
+    <AuthProvider>
+      <AppProvider>
+        <NotificationProvider>
+          <AppContent />
+          <Toaster />
+        </NotificationProvider>
+      </AppProvider>
+    </AuthProvider>
+  );
+}
+
 const AppContent: React.FC = () => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
   const { currentView } = useAppContext();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen w-full flex items-center justify-center">
+        <CosmicBackground />
+        <div className="relative z-10 text-center">
+          <div className="w-8 h-8 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-slate-400 mt-4">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen w-full relative">
+        <CosmicBackground />
+        <div className="relative z-10 flex items-center justify-center min-h-screen">
+          <LoginPage />
+        </div>
+      </div>
+    );
+  }
 
   const renderCurrentView = () => {
     switch (currentView) {
@@ -67,16 +105,12 @@ const AppContent: React.FC = () => {
     }
   };
 
-  if (!isAuthenticated) {
-    return <LoginPage />;
-  }
-
   return (
-    <>
+    <div className="min-h-screen w-full relative bg-slate-900/50">
       <CosmicBackground />
-      <ErrorToast />
-      
-      <div className="min-h-screen relative z-10 flex flex-col">
+      <div className="relative z-10">
+        <ErrorToast />
+        
         {/* Header */}
         <header className="p-6">
           <div className="flex items-center justify-between">
@@ -114,18 +148,8 @@ const AppContent: React.FC = () => {
           </p>
         </footer>
       </div>
-    </>
+    </div>
   );
 };
-
-function App() {
-  return (
-    <AuthProvider>
-      <AppProvider>
-        <AppContent />
-      </AppProvider>
-    </AuthProvider>
-  );
-}
 
 export default App;

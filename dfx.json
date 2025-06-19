@@ -15,6 +15,16 @@
       "workspace": "PivotFlow_frontend"
     }
   },
+  "networks": {
+    "local": {
+      "bind": "127.0.0.1:4943",
+      "type": "ephemeral"
+    },
+    "ic": {
+      "providers": ["https://ic0.app"],
+      "type": "persistent"
+    }
+  },
   "defaults": {
     "build": {
       "args": "",

@@ -2,16 +2,16 @@ import React from 'react';
 
 export const CosmicBackground: React.FC = () => {
   return (
-    <div className="fixed inset-0 overflow-hidden pointer-events-none">
+    <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
       {/* Base gradient background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900"></div>
+      <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 opacity-90"></div>
       
-      {/* Animated stars */}
+      {/* Animated stars with reduced opacity */}
       <div className="absolute inset-0">
         {Array.from({ length: 50 }).map((_, i) => (
           <div
             key={i}
-            className="absolute w-1 h-1 bg-white rounded-full animate-pulse"
+            className="absolute w-1 h-1 bg-white rounded-full animate-pulse opacity-60"
             style={{
               left: `${Math.random() * 100}%`,
               top: `${Math.random() * 100}%`,

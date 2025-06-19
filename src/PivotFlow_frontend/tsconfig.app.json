@@ -21,10 +21,11 @@
     "noFallthroughCasesInSwitch": true,
 
     /* for ShadCN */
-    "baseUrl": ".",
+  
+  "baseUrl": ".", // Relative to tsconfig.json location
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["src/*"] // Maps @/lib/utils to src/lib/utils within frontend
     }
-  },
+},
   "include": ["src"]
 }

@@ -6,10 +6,17 @@ export const ErrorToast: React.FC = () => {
   const { errorMessage, setError } = useAppContext();
 
   useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+    
     if (errorMessage) {
-      const timer = setTimeout(() => setError(null), 5000);
-      return () => clearTimeout(timer);
+      timeoutId = setTimeout(() => setError(null), 5000);
     }
+
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
   }, [errorMessage, setError]);
 
   if (!errorMessage) return null;

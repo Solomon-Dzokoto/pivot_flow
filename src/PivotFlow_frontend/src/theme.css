@@ -1,0 +1,123 @@
+/* src/PivotFlow_frontend/src/theme.css */
+
+/* Animated Background */
+@keyframes subtle-gradient-animation {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.animated-subtle-gradient {
+  background: linear-gradient(-45deg,
+    hsl(var(--gradient-color-1)),
+    hsl(var(--gradient-color-2)),
+    hsl(var(--gradient-color-3)),
+    hsl(var(--gradient-color-2)),
+    hsl(var(--gradient-color-1))
+  );
+  background-size: 400% 400%;
+  animation: subtle-gradient-animation 25s ease infinite;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -1; /* Ensure it's behind all content */
+}
+
+/* If a particle animation is preferred, it would be more complex:
+   Requires multiple small elements and more detailed keyframes.
+   For simplicity, a moving gradient is chosen first.
+*/
+
+/* Base Transitions & Common Element Styling */
+button,
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="search"],
+input[type="number"],
+textarea,
+select {
+  @apply transition-all duration-300 ease-in-out;
+}
+
+/* Generic Button Styles (can be extended by specific button components) */
+button {
+  @apply focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background;
+  /* Default focus ring color is already set by --ring (theme-accent) in index.css */
+}
+
+button:hover {
+  @apply brightness-110 scale-[1.03]; /* Subtle hover effect */
+}
+
+/* Generic Input Styles (can be extended) */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="search"],
+input[type="number"],
+textarea,
+select {
+  @apply bg-input border-border text-foreground placeholder:text-muted-foreground;
+  /* Default focus uses --ring which is theme-accent */
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+   /* border-color: hsl(var(--accent)); Already handled by focus-visible:ring-ring */
+   /* box-shadow: 0 0 0 2px hsl(var(--accent) / 0.4); */ /* Example custom shadow if needed */
+}
+
+
+/* Neon Glow Effects - Now using CSS variables for theme adaptability */
+/* These variables should be defined in index.css :root and .dark scopes */
+.neon-glow {
+  box-shadow:
+    0 0 5px hsl(var(--neon-glow-color-1)),
+    0 0 10px hsl(var(--neon-glow-color-1)),
+    0 0 15px hsl(var(--neon-glow-color-2)),
+    0 0 20px hsl(var(--neon-glow-color-2));
+}
+
+.neon-glow-subtle {
+  box-shadow:
+    0 0 3px hsl(var(--neon-glow-color-1)),
+    0 0 6px hsl(var(--neon-glow-color-2));
+}
+
+/* For text glow */
+.neon-text-glow {
+  text-shadow:
+    0 0 2px hsl(var(--background)), /* Helps text stand out from its own glow, uses current theme background */
+    0 0 5px hsl(var(--neon-glow-color-1)),
+    0 0 10px hsl(var(--neon-glow-color-1));
+}
+
+/* For borders (applied to an element, or a pseudo-element for border) */
+.neon-glow-border {
+  border: 1px solid hsl(var(--accent) / 0.3); /* Faint border using theme accent */
+  box-shadow:
+    0 0 5px hsl(var(--accent) / 0.5), /* Glow using theme accent */
+    0 0 10px hsl(var(--accent) / 0.3);
+}
+
+/* Typography Defaults (Tailwind's preflight usually handles most of this) */
+/* Ensure Inter font is applied (already on body, but good for explicit component styling if needed) */
+h1, h2, h3, h4, h5, h6 {
+  @apply font-sans text-foreground;
+  /* Add default margins if not using a typography plugin */
+  /* Example: @apply mb-4 mt-6; */
+}
+
+p {
+  @apply font-sans text-foreground;
+  /* Example: @apply mb-4; */
+}
+
+/* Ensure links use accent color and have underline on hover */
+a {
+  @apply text-accent hover:underline;
+}

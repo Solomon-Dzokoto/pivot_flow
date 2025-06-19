@@ -120,8 +120,13 @@ interface AppContextType {
   setError: (error: string | null) => void;
   
   // Canister Info (for operator)
-  canisterCycles: number;
+  canisterCycles: bigint | null; // Changed to bigint | null to match canister return & initial state
+  canisterMemory: bigint | null;
+  icpPrice: number | null;
   isOperator: boolean;
+  fetchCanisterCycles: () => Promise<void>;
+  fetchCanisterMemory: () => Promise<void>;
+  fetchICPPrice: () => Promise<void>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -245,8 +250,11 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [recentActivity, setRecentActivity] = useState<ActivityItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [canisterCycles] = useState(1200000000000); // 1.2 Trillion
-  const [isOperator] = useState(true); // Mock operator status
+  // Canister Info State
+  const [canisterCycles, setCanisterCycles] = useState<bigint | null>(null);
+  const [canisterMemory, setCanisterMemory] = useState<bigint | null>(null);
+  const [icpPrice, setIcpPrice] = useState<number | null>(null);
+  const [isOperator] = useState(true); // Mock operator status, can be fetched later
 
   const [settings, setSettings] = useState<AppSettings>({
     apiKeys: {
@@ -274,13 +282,19 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   useEffect(() => {
     let isMounted = true;
 
-    const loadData = async () => {
-      if (isAuthenticated && principal) {
+    const loadInitialData = async () => {
+      if (isAuthenticated && principal && isMounted) {
         try {
           setIsLoading(true);
-          // Load user-specific data from ICP canister
+          // Load user-specific data
           await loadUserData();
-          if (isMounted) {
+
+          // Load canister/global data
+          await fetchCanisterCycles();
+          await fetchCanisterMemory();
+          await fetchICPPrice();
+
+          if (isMounted) { // Re-check isMounted after async operations
             addActivity({
               type: 'portfolio_update',
               message: `Welcome back! Logged in with principal: ${principal?.slice(0, 8)}...`,
@@ -288,7 +302,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
             });
           }
         } catch (error) {
-          console.error('Failed to load user data:', error);
+          console.error('Failed to load initial data:', error);
           if (isMounted) {
             setError('Failed to load user data');
           }
@@ -297,41 +311,38 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
             setIsLoading(false);
           }
         }
-      } else {
-        // Clear user data when not authenticated
+      } else if (isMounted) { // Clear data if not authenticated
         clearUserData();
+        setCanisterCycles(null);
+        setCanisterMemory(null);
+        setIcpPrice(null);
       }
     };
 
-    loadData();
+    loadInitialData();
 
     return () => {
       isMounted = false;
     };
-  }, [isAuthenticated, principal]);
+  }, [isAuthenticated, principal]); // Dependencies for initial load
 
   const loadUserData = async () => {
+    // This function can remain focused on user-specific data like alerts, wallets
+    // For now, using mock data as before.
+    // setIsLoading(true); // Handled by loadInitialData
     try {
-      setIsLoading(true);
-      // TODO: Replace with actual ICP canister calls
-      // const userAlerts = await canisterActor.getUserNftAlerts(principal);
-      // const userGasAlerts = await canisterActor.getUserGasAlerts(principal);
-      // const userWallets = await canisterActor.getUserWallets(principal);
-      // const userActivity = await canisterActor.getUserActivity(principal);
-      
-      // For now, use mock data
+      // TODO: Replace with actual ICP canister calls for user data
       setNftAlerts(mockNftAlerts);
       setNftPortfolio(mockNftPortfolio);
       setRecentActivity(mockActivity);
     } catch (error) {
       console.error('Failed to load user data:', error);
       setError('Failed to load user data');
-    } finally {
-      setIsLoading(false);
     }
+    // setIsLoading(false); // Handled by loadInitialData
   };
 
-  const clearUserData = () => {
+  const clearUserData = () => { // Clears only user-specific data
     setNftAlerts([]);
     setGasAlerts([]);
     setWalletAddresses([]);
@@ -551,6 +562,42 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     }
   };
 
+  // --- New Fetcher Functions ---
+  const fetchCanisterCycles = async () => {
+    try {
+      const cycles = await canisterClient.getCycles();
+      setCanisterCycles(cycles);
+    } catch (err) {
+      console.error("Failed to fetch canister cycles:", err);
+      setError("Failed to load canister cycles.");
+      setCanisterCycles(null); // Set to null or a default error indicator
+    }
+  };
+
+  const fetchCanisterMemory = async () => {
+    try {
+      const memory = await canisterClient.getCanisterMemoryUsage();
+      setCanisterMemory(memory);
+    } catch (err) {
+      console.error("Failed to fetch canister memory:", err);
+      setError("Failed to load canister memory usage.");
+      setCanisterMemory(null);
+    }
+  };
+
+  const fetchICPPrice = async () => {
+    try {
+      const price = await canisterClient.getICPPrice();
+      setIcpPrice(price);
+    } catch (err) {
+      console.error("Failed to fetch ICP price:", err);
+      // Don't set a global error for this conceptual API, could be optional
+      // setError("Failed to load ICP price.");
+      setIcpPrice(null);
+    }
+  };
+
+
   return (
     <AppContext.Provider
       value={{
@@ -578,7 +625,12 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         errorMessage,
         setError,
         canisterCycles,
+        canisterMemory,
+        icpPrice,
         isOperator,
+        fetchCanisterCycles,
+        fetchCanisterMemory,
+        fetchICPPrice,
       }}
     >
       {children}

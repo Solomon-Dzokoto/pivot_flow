@@ -69,8 +69,8 @@ export interface CanisterService extends _SERVICE {
   getNetworkFees: () => Promise<NetworkFee[]>;
   getCycles: () => Promise<bigint>;
   health: () => Promise<boolean>;
-
-
+  getCanisterMemoryUsage: () => Promise<bigint>; // Nat becomes bigint
+  getICPPrice: () => Promise<[] | [number]>; // ?Float becomes an optional array with one number
 }
 
 export class CanisterClient {
@@ -231,6 +231,17 @@ export class CanisterClient {
   public async health() {
     if (!this.actor) throw new Error('Actor not initialized');
     return await this.actor.health();
+  }
+
+  public async getCanisterMemoryUsage(): Promise<bigint> {
+    if (!this.actor) throw new Error('Actor not initialized');
+    return this.actor.getCanisterMemoryUsage();
+  }
+
+  public async getICPPrice(): Promise<number | null> {
+    if (!this.actor) throw new Error('Actor not initialized');
+    const result = await this.actor.getICPPrice();
+    return result.length > 0 ? result[0] : null;
   }
 }
 

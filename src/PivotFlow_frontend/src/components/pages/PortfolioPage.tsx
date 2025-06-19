@@ -3,6 +3,13 @@ import { useAppContext } from '../../contexts/AppContext';
 import { LoadingSpinner, LoadingSkeleton } from '../LoadingSpinner';
 import { Plus, Wallet, ExternalLink, RefreshCw, Trash2, Eye } from 'lucide-react';
 
+/**
+ * @page PortfolioPage
+ * @description Manages and displays user's NFT portfolio, connected wallets, and token balances.
+ * Allows users to add/remove wallets, refresh portfolio data, and view their NFTs.
+ * Token balances are currently mocked.
+ * @returns {React.ReactElement} The rendered portfolio management page.
+ */
 export const PortfolioPage: React.FC = () => {
   const { 
     walletAddresses, 
@@ -20,9 +27,14 @@ export const PortfolioPage: React.FC = () => {
     label: '',
   });
 
+  /**
+   * Handles the submission of the "Add Wallet" form.
+   * Validates input and calls the context function to add a wallet.
+   * @param {React.FormEvent} e - The form submission event.
+   */
   const handleWalletSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!walletForm.address) return;
+    if (!walletForm.address) return; // Basic validation
 
     addWalletAddress({
       address: walletForm.address,
@@ -38,14 +50,29 @@ export const PortfolioPage: React.FC = () => {
     setShowAddWalletForm(false);
   };
 
-  const formatAddress = (address: string) => {
+  /**
+   * Formats a blockchain address for concise display.
+   * @param {string} address - The full blockchain address.
+   * @returns {string} A shortened version of the address (e.g., "0x123...abcd").
+   */
+  const formatAddress = (address: string): string => {
+    if (address.length < 10) return address; // Avoid errors on very short strings
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
   };
 
-  const getTotalValue = () => {
+  /**
+   * Calculates the total estimated value of all NFTs in the portfolio.
+   * (Currently sums up floor prices in ETH, assuming all are ETH based for mock).
+   * @returns {number} The total estimated value.
+   */
+  const getTotalValue = (): number => {
     return nftPortfolio.reduce((sum, nft) => sum + nft.floorPrice, 0);
   };
 
+  /**
+   * Provides simple text icons for different blockchains.
+   * In a real app, these could be SVG components or image URLs.
+   */
   const blockchainIcons: { [key: string]: string } = {
     'Ethereum': '⟠',
     'Polygon': '⬢',
@@ -57,46 +84,46 @@ export const PortfolioPage: React.FC = () => {
     <div className="space-y-8">
       {/* Header */}
       <div className="text-center space-y-2">
-        <h1 className="text-4xl font-bold bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+        <h1 className="text-4xl font-bold bg-gradient-to-r from-theme-accent via-purple-400 to-pink-400 bg-clip-text text-transparent"> {/* Use theme-accent */}
           NFT Portfolio
         </h1>
-        <p className="text-slate-400">Manage your cross-chain NFT collection</p>
+        <p className="text-muted-foreground">Manage your cross-chain NFT collection</p> {/* Use text-muted-foreground */}
       </div>
 
       {/* Portfolio Summary */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-6 shadow-2xl">
+        <div className="bg-card/70 backdrop-blur-sm border-border rounded-2xl p-6 shadow-2xl"> {/* Use theme colors */}
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-slate-400 text-sm">Total NFTs</p>
-              <p className="text-3xl font-bold text-white">{nftPortfolio.length}</p>
+              <p className="text-muted-foreground text-sm">Total NFTs</p> {/* Use theme text */}
+              <p className="text-3xl font-bold text-foreground">{nftPortfolio.length}</p> {/* Use theme text */}
             </div>
-            <div className="p-3 bg-cyan-500/20 rounded-xl">
-              <Eye className="w-6 h-6 text-cyan-400" />
+            <div className="p-3 bg-theme-accent/20 rounded-xl"> {/* Use theme-accent */}
+              <Eye className="w-6 h-6 text-accent" /> {/* Use theme-accent */}
             </div>
           </div>
         </div>
 
-        <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-6 shadow-2xl">
+        <div className="bg-card/70 backdrop-blur-sm border-border rounded-2xl p-6 shadow-2xl"> {/* Use theme colors */}
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-slate-400 text-sm">Total Value</p>
-              <p className="text-3xl font-bold text-white">{getTotalValue().toFixed(2)} ETH</p>
+              <p className="text-muted-foreground text-sm">Total Value</p> {/* Use theme text */}
+              <p className="text-3xl font-bold text-foreground">{getTotalValue().toFixed(2)} ETH</p> {/* Use theme text */}
             </div>
-            <div className="p-3 bg-green-500/20 rounded-xl">
-              <Wallet className="w-6 h-6 text-green-400" />
+            <div className="p-3 bg-green-500/20 rounded-xl"> {/* Keep semantic color */}
+              <Wallet className="w-6 h-6 text-green-400" /> {/* Keep semantic color */}
             </div>
           </div>
         </div>
 
-        <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-6 shadow-2xl">
+        <div className="bg-card/70 backdrop-blur-sm border-border rounded-2xl p-6 shadow-2xl"> {/* Use theme colors */}
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-slate-400 text-sm">Connected Wallets</p>
-              <p className="text-3xl font-bold text-white">{walletAddresses.length}</p>
+              <p className="text-muted-foreground text-sm">Connected Wallets</p> {/* Use theme text */}
+              <p className="text-3xl font-bold text-foreground">{walletAddresses.length}</p> {/* Use theme text */}
             </div>
-            <div className="p-3 bg-purple-500/20 rounded-xl">
-              <Plus className="w-6 h-6 text-purple-400" />
+            <div className="p-3 bg-purple-500/20 rounded-xl"> {/* Keep semantic color */}
+              <Plus className="w-6 h-6 text-purple-400" /> {/* Keep semantic color */}
             </div>
           </div>
         </div>
@@ -106,7 +133,7 @@ export const PortfolioPage: React.FC = () => {
       <div className="flex flex-wrap justify-center gap-4">
         <button
           onClick={() => setShowAddWalletForm(!showAddWalletForm)}
-          className="flex items-center space-x-2 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white px-6 py-3 rounded-2xl font-medium transition-all duration-300 transform hover:scale-105 shadow-lg"
+          className="flex items-center space-x-2 bg-primary text-primary-foreground hover:bg-primary/90 px-6 py-3 rounded-2xl font-medium shadow-lg hover:shadow-accent/25" /* Themed button */
         >
           <Plus size={20} />
           <span>Add Wallet</span>
@@ -115,7 +142,7 @@ export const PortfolioPage: React.FC = () => {
         <button
           onClick={() => refreshPortfolio()}
           disabled={isLoading}
-          className="flex items-center space-x-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white px-6 py-3 rounded-2xl font-medium transition-all duration-300 transform hover:scale-105 shadow-lg disabled:opacity-50"
+          className="flex items-center space-x-2 bg-secondary text-secondary-foreground hover:bg-secondary/90 px-6 py-3 rounded-2xl font-medium shadow-lg disabled:opacity-50" /* Themed button */
         >
           {isLoading ? <LoadingSpinner size="sm" /> : <RefreshCw size={20} />}
           <span>Refresh Portfolio</span>
@@ -124,12 +151,12 @@ export const PortfolioPage: React.FC = () => {
 
       {/* Add Wallet Form */}
       {showAddWalletForm && (
-        <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-6 shadow-2xl">
-          <h2 className="text-xl font-semibold text-white mb-6">Add Wallet Address</h2>
+        <div className="bg-card/70 backdrop-blur-sm border-border rounded-2xl p-6 shadow-2xl"> {/* Use theme colors */}
+          <h2 className="text-xl font-semibold text-foreground mb-6">Add Wallet Address</h2> {/* Use theme text */}
           
           <form onSubmit={handleWalletSubmit} className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-slate-300 mb-2">
+              <label className="block text-sm font-medium text-foreground mb-2"> {/* Use theme text */}
                 Wallet Address *
               </label>
               <input
@@ -137,19 +164,19 @@ export const PortfolioPage: React.FC = () => {
                 value={walletForm.address}
                 onChange={(e) => setWalletForm({ ...walletForm, address: e.target.value })}
                 placeholder="0x... or public address"
-                className="w-full bg-slate-700/50 border border-slate-600/50 rounded-xl px-4 py-3 text-white placeholder-slate-400 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all duration-300"
+                className="w-full bg-input border-border rounded-xl px-4 py-3 text-foreground placeholder:text-muted-foreground focus:ring-ring focus:border-accent" /* Theme input */
                 required
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">
+              <label className="block text-sm font-medium text-foreground mb-2"> {/* Use theme text */}
                 Blockchain *
               </label>
               <select
                 value={walletForm.blockchain}
                 onChange={(e) => setWalletForm({ ...walletForm, blockchain: e.target.value })}
-                className="w-full bg-slate-700/50 border border-slate-600/50 rounded-xl px-4 py-3 text-white focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all duration-300"
+                className="w-full bg-input border-border rounded-xl px-4 py-3 text-foreground focus:ring-ring focus:border-accent" /* Theme select */
               >
                 <option value="Ethereum">Ethereum</option>
                 <option value="Polygon">Polygon</option>
@@ -159,7 +186,7 @@ export const PortfolioPage: React.FC = () => {
             </div>
 
             <div className="md:col-span-3">
-              <label className="block text-sm font-medium text-slate-300 mb-2">
+              <label className="block text-sm font-medium text-foreground mb-2"> {/* Use theme text */}
                 Label (Optional)
               </label>
               <input
@@ -167,7 +194,7 @@ export const PortfolioPage: React.FC = () => {
                 value={walletForm.label}
                 onChange={(e) => setWalletForm({ ...walletForm, label: e.target.value })}
                 placeholder="e.g., Main Wallet, Trading Wallet"
-                className="w-full bg-slate-700/50 border border-slate-600/50 rounded-xl px-4 py-3 text-white placeholder-slate-400 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all duration-300"
+                className="w-full bg-input border-border rounded-xl px-4 py-3 text-foreground placeholder:text-muted-foreground focus:ring-ring focus:border-accent" /* Theme input */
               />
             </div>
 
@@ -175,13 +202,13 @@ export const PortfolioPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setShowAddWalletForm(false)}
-                className="px-6 py-3 bg-slate-700/50 hover:bg-slate-700/70 text-slate-300 rounded-xl transition-all duration-300"
+                className="px-6 py-3 bg-secondary text-secondary-foreground hover:bg-secondary/90 rounded-xl" /* Theme button */
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="flex items-center space-x-2 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white px-6 py-3 rounded-xl font-medium transition-all duration-300"
+                className="flex items-center space-x-2 bg-primary text-primary-foreground hover:bg-primary/90 px-6 py-3 rounded-xl font-medium" /* Theme button */
               >
                 <span>Add Wallet</span>
               </button>
@@ -190,58 +217,111 @@ export const PortfolioPage: React.FC = () => {
         </div>
       )}
 
-      {/* Connected Wallets */}
-      {walletAddresses.length > 0 && (
-        <div className="bg-gradient-to-br from-slate-800/30 to-slate-900/30 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-6 shadow-2xl">
-          <h2 className="text-xl font-semibold text-white mb-6 flex items-center">
-            <Wallet className="w-5 h-5 mr-2 text-cyan-400" />
-            Connected Wallets ({walletAddresses.length})
-          </h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {walletAddresses.map((wallet) => (
-              <div
-                key={wallet.id}
-                className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-4 hover:border-slate-600/50 transition-all duration-300"
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <span className="text-2xl">{blockchainIcons[wallet.blockchain]}</span>
-                    <div>
-                      <p className="text-white font-medium">
-                        {wallet.label || formatAddress(wallet.address)}
-                      </p>
-                      <p className="text-slate-400 text-sm font-mono">
-                        {formatAddress(wallet.address)}
-                      </p>
-                      <p className="text-slate-500 text-xs">{wallet.blockchain}</p>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => removeWalletAddress(wallet.id)}
-                    className="text-slate-400 hover:text-red-400 transition-colors"
+      {/* Main Content Area - Using Flex for two columns on larger screens */}
+      <div className="flex flex-col lg:flex-row gap-8">
+        {/* Left Column: Connected Wallets & Add Wallet Form (if not shown above actions) */}
+        <div className="lg:w-1/2 space-y-8">
+          {walletAddresses.length > 0 && (
+            <div className="bg-card/50 backdrop-blur-sm border-border rounded-2xl p-6 shadow-2xl">
+              <h2 className="text-xl font-semibold text-foreground mb-6 flex items-center">
+                <Wallet className="w-5 h-5 mr-2 text-accent" />
+                Connected Wallets ({walletAddresses.length})
+              </h2>
+              <div className="space-y-4"> {/* Changed from grid to space-y for a list feel */}
+                {walletAddresses.map((wallet) => (
+                  <div
+                    key={wallet.id}
+                    className="bg-card border-border rounded-xl p-4 hover:border-accent/50 transition-all duration-300 flex items-center justify-between"
                   >
-                    <Trash2 size={16} />
-                  </button>
-                </div>
+                    <div className="flex items-center space-x-3">
+                      <span className="text-2xl p-2 bg-secondary/50 rounded-md">{blockchainIcons[wallet.blockchain] || '🔗'}</span>
+                      <div>
+                        <p className="text-foreground font-medium">
+                          {wallet.label || formatAddress(wallet.address)}
+                        </p>
+                        <p className="text-muted-foreground text-sm font-mono">
+                          {formatAddress(wallet.address)}
+                        </p>
+                        <p className="text-muted-foreground/70 text-xs">{wallet.blockchain}</p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => removeWalletAddress(wallet.id)}
+                      className="p-2 text-muted-foreground hover:text-destructive-foreground hover:bg-destructive/20 rounded-md"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                ))}
               </div>
-            ))}
+            </div>
+          )}
+        </div>
+
+        {/* Right Column: Token Balances */}
+        <div className="lg:w-1/2 space-y-8">
+          <div className="bg-card/50 backdrop-blur-sm border-border rounded-2xl p-6 shadow-2xl">
+            <h2 className="text-xl font-semibold text-foreground mb-6 flex items-center">
+              {/* Placeholder icon, replace with a suitable one like 'Coins' or 'Briefcase' from lucide-react */}
+              <Wallet className="w-5 h-5 mr-2 text-accent" />
+              Token Balances (Mocked)
+            </h2>
+            <div className="space-y-4">
+              {/* ICP */}
+              <div className="bg-card border-border p-4 rounded-lg hover:border-accent/50 transition-all duration-300">
+                <div className="flex items-center justify-between mb-1">
+                  <div className="flex items-center space-x-2">
+                    {/* <img src="/icp-logo.svg" alt="ICP Logo" className="w-6 h-6"/> Placeholder for actual logo */}
+                    <span className="text-lg font-bold text-foreground">ICP</span>
+                  </div>
+                  <span className="text-muted-foreground text-sm">Internet Computer</span>
+                </div>
+                <p className="text-2xl font-semibold text-foreground">105.50 ICP</p>
+                <p className="text-sm text-green-400">$1,280.70 USD</p>
+              </div>
+              {/* XTC */}
+              <div className="bg-card border-border p-4 rounded-lg hover:border-accent/50 transition-all duration-300">
+                <div className="flex items-center justify-between mb-1">
+                  <div className="flex items-center space-x-2">
+                    <span className="text-lg font-bold text-foreground">XTC</span>
+                  </div>
+                  <span className="text-muted-foreground text-sm">Cycles Token</span>
+                </div>
+                <p className="text-2xl font-semibold text-foreground">2,500,000 XTC</p>
+                <p className="text-sm text-green-400">$3.50 USD</p>
+              </div>
+              {/* ckBTC */}
+              <div className="bg-card border-border p-4 rounded-lg hover:border-accent/50 transition-all duration-300">
+                <div className="flex items-center justify-between mb-1">
+                  <div className="flex items-center space-x-2">
+                    <span className="text-lg font-bold text-foreground">ckBTC</span>
+                  </div>
+                  <span className="text-muted-foreground text-sm">Chain-Key Bitcoin</span>
+                </div>
+                <p className="text-2xl font-semibold text-foreground">0.05 ckBTC</p>
+                <p className="text-sm text-green-400">$2,100.00 USD</p>
+              </div>
+               {/* Placeholder for more tokens */}
+               <div className="text-center mt-4">
+                <p className="text-xs text-muted-foreground">More tokens coming soon...</p>
+               </div>
+            </div>
           </div>
         </div>
-      )}
+      </div>
 
-      {/* NFT Portfolio */}
-      <div className="bg-gradient-to-br from-slate-800/30 to-slate-900/30 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-6 shadow-2xl">
-        <h2 className="text-xl font-semibold text-white mb-6 flex items-center">
-          <Eye className="w-5 h-5 mr-2 text-purple-400" />
+      {/* NFT Portfolio Grid (remains at the bottom) */}
+      <div className="bg-card/50 backdrop-blur-sm border-border rounded-2xl p-6 shadow-2xl"> {/* Use theme colors */}
+        <h2 className="text-xl font-semibold text-foreground mb-6 flex items-center"> {/* Use theme text */}
+          <Eye className="w-5 h-5 mr-2 text-purple-400" /> {/* Keep semantic color */}
           My NFTs ({nftPortfolio.length})
         </h2>
 
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="bg-slate-800/50 rounded-xl p-4">
-                <div className="w-full h-48 bg-slate-700 rounded-xl mb-4 animate-pulse"></div>
+              <div key={i} className="bg-card/80 rounded-xl p-4"> {/* Theme skeleton */}
+                <div className="w-full h-48 bg-secondary rounded-xl mb-4 animate-pulse"></div> {/* Theme skeleton */}
                 <LoadingSkeleton lines={3} />
               </div>
             ))}
@@ -249,8 +329,8 @@ export const PortfolioPage: React.FC = () => {
         ) : nftPortfolio.length === 0 ? (
           <div className="text-center py-12">
             <div className="text-6xl mb-4">🖼️</div>
-            <p className="text-slate-400 mb-2">No NFTs found</p>
-            <p className="text-sm text-slate-500">
+            <p className="text-muted-foreground mb-2">No NFTs found</p> {/* Use theme text */}
+            <p className="text-sm text-muted-foreground/70"> {/* Use theme text */}
               {walletAddresses.length === 0 
                 ? "Add a wallet address to view your NFTs"
                 : "Refresh your portfolio or add more wallets"
@@ -262,9 +342,9 @@ export const PortfolioPage: React.FC = () => {
             {nftPortfolio.map((nft) => (
               <div
                 key={nft.id}
-                className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-4 hover:border-slate-600/50 transition-all duration-300 group"
+                className="bg-card border-border rounded-xl p-4 hover:border-accent/50 transition-all duration-300 group" /* Theme item */
               >
-                <div className="aspect-square rounded-xl overflow-hidden mb-4 bg-slate-700">
+                <div className="aspect-square rounded-xl overflow-hidden mb-4 bg-secondary"> {/* Theme image bg */}
                   <img
                     src={nft.imageUrl}
                     alt={`${nft.collectionName} ${nft.tokenId}`}
@@ -273,13 +353,13 @@ export const PortfolioPage: React.FC = () => {
                 </div>
                 
                 <div className="space-y-2">
-                  <h3 className="text-white font-semibold truncate">{nft.collectionName}</h3>
-                  <p className="text-slate-400 text-sm">{nft.tokenId}</p>
+                  <h3 className="text-foreground font-semibold truncate">{nft.collectionName}</h3> {/* Use theme text */}
+                  <p className="text-muted-foreground text-sm">{nft.tokenId}</p> {/* Use theme text */}
                   
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-xs text-slate-500">Floor Price</p>
-                      <p className="text-green-400 font-bold">
+                      <p className="text-xs text-muted-foreground/70">Floor Price</p> {/* Use theme text */}
+                      <p className="text-green-400 font-bold"> {/* Semantic color, keep */}
                         {nft.floorPrice.toFixed(2)} {nft.currency}
                       </p>
                     </div>
@@ -287,7 +367,7 @@ export const PortfolioPage: React.FC = () => {
                       href={nft.marketplaceUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="p-2 bg-slate-700/50 hover:bg-slate-700/70 text-slate-400 hover:text-cyan-400 rounded-lg transition-all duration-300"
+                      className="p-2 bg-secondary hover:bg-secondary/80 text-muted-foreground hover:text-accent rounded-lg" /* Themed icon button */
                     >
                       <ExternalLink size={16} />
                     </a>

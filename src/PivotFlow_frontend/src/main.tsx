@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import App from './App.tsx';
 import './index.css';
 import { authService } from './lib/auth';
+import { ThemeProvider } from './contexts/ThemeContext'; // Import ThemeProvider
 
 async function init() {
   try {
@@ -12,7 +13,9 @@ async function init() {
     
     createRoot(document.getElementById('root')!).render(
       <StrictMode>
-        <App />
+        <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+          <App />
+        </ThemeProvider>
       </StrictMode>
     );
   } catch (error) {

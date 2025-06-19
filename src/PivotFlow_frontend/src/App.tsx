@@ -1,4 +1,5 @@
 import React from 'react';
+import './theme.css'; // Import global theme styles
 import { AuthProvider } from './contexts/AuthContext';
 import { AppProvider, useAppContext } from './contexts/AppContext';
 import { NotificationProvider } from './contexts/NotificationContext';
@@ -7,6 +8,7 @@ import { CosmicBackground } from './components/CosmicBackground';
 import { ErrorToast } from './components/ErrorToast';
 import { LoginPage } from './components/LoginPage';
 import { UserProfile } from './components/UserProfile';
+import { ThemeToggle } from './components/ui/ThemeToggle'; // Import ThemeToggle
 import { DashboardPage } from './components/pages/DashboardPage';
 import { NftAlertsPage } from './components/pages/NftAlertsPage';
 import { BlockchainFeesPage } from './components/pages/BlockchainFeesPage';
@@ -106,7 +108,8 @@ const AppContent: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen w-full relative bg-slate-900/50">
+    <div className="min-h-screen w-full relative animated-subtle-gradient"> {/* Applied animated background */}
+      {/* CosmicBackground can be kept for particles, or removed if gradient is enough */}
       <CosmicBackground />
       <div className="relative z-10">
         <ErrorToast />
@@ -127,7 +130,10 @@ const AppContent: React.FC = () => {
                 </p>
               </div>
             </div>
-            <UserProfile />
+            <div className="flex items-center space-x-2"> {/* Wrapper for UserProfile and ThemeToggle */}
+              <ThemeToggle />
+              <UserProfile />
+            </div>
           </div>
         </header>
 
@@ -142,8 +148,8 @@ const AppContent: React.FC = () => {
         </main>
 
         {/* Footer */}
-        <footer className="p-6 text-center border-t border-slate-700/50">
-          <p className="text-slate-500 text-sm">
+        <footer className="p-6 text-center border-t border-border"> {/* Use theme variable for border */}
+          <p className="text-muted-foreground text-sm"> {/* Use theme variable for text */}
             © 2025 PivotFlow • Powered by Internet Computer Protocol
           </p>
         </footer>

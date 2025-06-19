@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
-import { useAppContext } from '../../contexts/AppContext';
+import React, { useState, useEffect } from 'react';
+import { useAppContext, NFTItem } from '../../contexts/AppContext'; // Import NFTItem type
 import { LoadingSpinner, LoadingSkeleton } from '../LoadingSpinner';
-import { Plus, Wallet, ExternalLink, RefreshCw, Trash2, Eye } from 'lucide-react';
+import { Plus, Wallet, ExternalLink, RefreshCw, Trash2, Eye, Coins, Bitcoin, Zap as ZapIcon } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
+import { NftCard } from '../dashboard/widgets/NftCard'; // Import the new NftCard component
 
 /**
  * @page PortfolioPage
@@ -17,7 +19,11 @@ export const PortfolioPage: React.FC = () => {
     addWalletAddress, 
     removeWalletAddress, 
     refreshPortfolio, 
-    isLoading 
+    isLoading,
+    // For token prices
+    tokenPrices,
+    fetchTokenPrices,
+    isLoadingTokenPrices,
   } = useAppContext();
 
   const [showAddWalletForm, setShowAddWalletForm] = useState(false);
@@ -78,16 +84,47 @@ export const PortfolioPage: React.FC = () => {
     'Polygon': '⬢',
     'BNB Chain': '●',
     'Solana': '◈',
+    // Add more if needed, or use actual image icons later
   };
+
+  // --- Token Balances Logic ---
+  interface PortfolioToken {
+    id: string; // CoinGecko compatible ID
+    symbol: string;
+    name: string;
+    mockBalance: number;
+    icon?: LucideIcon; // Optional: Icon component
+    decimals?: number; // For formatting balance
+  }
+
+  const mockPortfolioTokens: PortfolioToken[] = [
+    { id: 'internet-computer', symbol: 'ICP', name: 'Internet Computer', mockBalance: 105.50, icon: Coins, decimals: 2 },
+    { id: 'bitcoin', symbol: 'ckBTC', name: 'Chain-Key Bitcoin', mockBalance: 0.05, icon: Bitcoin, decimals: 8 }, // Assuming 'bitcoin' for ckBTC price
+    { id: 'xtc', symbol: 'XTC', name: 'Cycles Token', mockBalance: 2500000, icon: ZapIcon, decimals: 0 }, // No direct price for XTC, usually pegged or derived
+    { id: 'ethereum', symbol: 'ETH', name: 'Ethereum', mockBalance: 1.5, icon: blockchainIcons['Ethereum'] ? undefined : undefined, decimals: 4 }, // Use text icon if no Lucide one
+    { id: 'solana', symbol: 'SOL', name: 'Solana', mockBalance: 25.0, icon: blockchainIcons['Solana'] ? undefined : undefined, decimals: 2 },
+    // Add more mock tokens if desired e.g. STX (Stacks) if coingecko id is 'blockstack'
+    // { id: 'blockstack', symbol: 'STX', name: 'Stacks', mockBalance: 500, icon: Layers /*Example*/, decimals: 0 },
+
+  ];
+
+  // Coingecko IDs for fetching prices
+  const targetTokenIds = mockPortfolioTokens.map(token => token.id).filter(id => id !== 'xtc'); // XTC doesn't have a direct CoinGecko price usually
+
+  useEffect(() => {
+    if (targetTokenIds.length > 0) {
+      fetchTokenPrices(targetTokenIds);
+    }
+  }, []); // Fetch on mount
 
   return (
     <div className="space-y-8">
       {/* Header */}
       <div className="text-center space-y-2">
-        <h1 className="text-4xl font-bold bg-gradient-to-r from-theme-accent via-purple-400 to-pink-400 bg-clip-text text-transparent"> {/* Use theme-accent */}
-          NFT Portfolio
+        <h1 className="text-4xl font-bold bg-gradient-to-r from-theme-accent via-purple-400 to-pink-400 bg-clip-text text-transparent">
+          Portfolio Overview
         </h1>
-        <p className="text-muted-foreground">Manage your cross-chain NFT collection</p> {/* Use text-muted-foreground */}
+        <p className="text-muted-foreground">Manage your wallets, tokens, and NFTs across chains.</p>
       </div>
 
       {/* Portfolio Summary */}
@@ -151,7 +188,7 @@ export const PortfolioPage: React.FC = () => {
 
       {/* Add Wallet Form */}
       {showAddWalletForm && (
-        <div className="bg-card/70 backdrop-blur-sm border-border rounded-2xl p-6 shadow-2xl"> {/* Use theme colors */}
+        <div className="bg-card/70 backdrop-blur-sm border-border rounded-2xl p-6 shadow-2xl smooth-appear"> {/* Use theme colors, ADDED smooth-appear */}
           <h2 className="text-xl font-semibold text-foreground mb-6">Add Wallet Address</h2> {/* Use theme text */}
           
           <form onSubmit={handleWalletSubmit} className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -264,116 +301,88 @@ export const PortfolioPage: React.FC = () => {
             <h2 className="text-xl font-semibold text-foreground mb-6 flex items-center">
               {/* Placeholder icon, replace with a suitable one like 'Coins' or 'Briefcase' from lucide-react */}
               <Wallet className="w-5 h-5 mr-2 text-accent" />
-              Token Balances (Mocked)
+              Token Balances
             </h2>
+            {isLoadingTokenPrices && targetTokenIds.length > 0 && (
+              <div className="flex justify-center items-center py-8">
+                <LoadingSpinner />
+                <p className="ml-2 text-muted-foreground">Loading token prices...</p>
+              </div>
+            )}
             <div className="space-y-4">
-              {/* ICP */}
-              <div className="bg-card border-border p-4 rounded-lg hover:border-accent/50 transition-all duration-300">
-                <div className="flex items-center justify-between mb-1">
-                  <div className="flex items-center space-x-2">
-                    {/* <img src="/icp-logo.svg" alt="ICP Logo" className="w-6 h-6"/> Placeholder for actual logo */}
-                    <span className="text-lg font-bold text-foreground">ICP</span>
+              {mockPortfolioTokens.map((token) => {
+                const livePrice = tokenPrices[token.id];
+                const usdValue = livePrice !== null && livePrice !== undefined ? token.mockBalance * livePrice : null;
+                const TokenIcon = token.icon;
+                const displayBalance = token.decimals !== undefined
+                                     ? token.mockBalance.toFixed(token.decimals)
+                                     : token.mockBalance.toLocaleString();
+
+                return (
+                  <div key={token.id} className="bg-card border-border p-4 rounded-lg hover:border-accent/50 transition-all duration-300">
+                    <div className="flex items-center justify-between mb-1">
+                      <div className="flex items-center space-x-2">
+                        {TokenIcon && <TokenIcon className="w-6 h-6 text-accent" />}
+                        {!TokenIcon && blockchainIcons[token.symbol] && <span className="text-2xl p-0 leading-none">{blockchainIcons[token.symbol]}</span>}
+                        {!TokenIcon && !blockchainIcons[token.symbol] && <Coins className="w-6 h-6 text-accent" /> }
+
+                        <span className="text-lg font-bold text-foreground">{token.symbol}</span>
+                      </div>
+                      <span className="text-muted-foreground text-sm text-right">{token.name}</span>
+                    </div>
+                    <p className="text-2xl font-semibold text-foreground">{displayBalance} {token.symbol}</p>
+                    {livePrice !== null && livePrice !== undefined ? (
+                      <p className="text-sm text-green-400">${usdValue ? usdValue.toFixed(2) : 'N/A'} USD</p>
+                    ) : token.id === 'xtc' ? (
+                       <p className="text-sm text-muted-foreground">(Not directly priced)</p>
+                    ) : (
+                      <p className="text-sm text-muted-foreground animate-pulse">Loading price...</p>
+                    )}
+                     {livePrice !== null && livePrice !== undefined && token.id !== 'xtc' && (
+                       <p className="text-xs text-muted-foreground/80">@ ${livePrice.toFixed(2)}/{token.symbol}</p>
+                     )}
                   </div>
-                  <span className="text-muted-foreground text-sm">Internet Computer</span>
-                </div>
-                <p className="text-2xl font-semibold text-foreground">105.50 ICP</p>
-                <p className="text-sm text-green-400">$1,280.70 USD</p>
-              </div>
-              {/* XTC */}
-              <div className="bg-card border-border p-4 rounded-lg hover:border-accent/50 transition-all duration-300">
-                <div className="flex items-center justify-between mb-1">
-                  <div className="flex items-center space-x-2">
-                    <span className="text-lg font-bold text-foreground">XTC</span>
-                  </div>
-                  <span className="text-muted-foreground text-sm">Cycles Token</span>
-                </div>
-                <p className="text-2xl font-semibold text-foreground">2,500,000 XTC</p>
-                <p className="text-sm text-green-400">$3.50 USD</p>
-              </div>
-              {/* ckBTC */}
-              <div className="bg-card border-border p-4 rounded-lg hover:border-accent/50 transition-all duration-300">
-                <div className="flex items-center justify-between mb-1">
-                  <div className="flex items-center space-x-2">
-                    <span className="text-lg font-bold text-foreground">ckBTC</span>
-                  </div>
-                  <span className="text-muted-foreground text-sm">Chain-Key Bitcoin</span>
-                </div>
-                <p className="text-2xl font-semibold text-foreground">0.05 ckBTC</p>
-                <p className="text-sm text-green-400">$2,100.00 USD</p>
-              </div>
-               {/* Placeholder for more tokens */}
-               <div className="text-center mt-4">
-                <p className="text-xs text-muted-foreground">More tokens coming soon...</p>
-               </div>
+                );
+              })}
             </div>
           </div>
         </div>
       </div>
 
       {/* NFT Portfolio Grid (remains at the bottom) */}
-      <div className="bg-card/50 backdrop-blur-sm border-border rounded-2xl p-6 shadow-2xl"> {/* Use theme colors */}
-        <h2 className="text-xl font-semibold text-foreground mb-6 flex items-center"> {/* Use theme text */}
-          <Eye className="w-5 h-5 mr-2 text-purple-400" /> {/* Keep semantic color */}
+      <div className="bg-card/50 backdrop-blur-sm border-border rounded-2xl p-6 shadow-2xl">
+        <h2 className="text-xl font-semibold text-foreground mb-6 flex items-center">
+          <Eye className="w-5 h-5 mr-2 text-purple-400" /> {/* Keep semantic color for now, or change to text-accent */}
           My NFTs ({nftPortfolio.length})
         </h2>
 
-        {isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {isLoading && nftPortfolio.length === 0 ? ( // Show skeleton only if portfolio is empty and loading
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
             {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="bg-card/80 rounded-xl p-4"> {/* Theme skeleton */}
-                <div className="w-full h-48 bg-secondary rounded-xl mb-4 animate-pulse"></div> {/* Theme skeleton */}
-                <LoadingSkeleton lines={3} />
+              <div key={i} className="bg-card border-border rounded-xl p-4 animate-pulse">
+                <div className="aspect-square rounded-lg bg-secondary mb-3"></div>
+                <div className="h-4 bg-secondary rounded w-3/4 mb-2"></div>
+                <div className="h-3 bg-secondary rounded w-1/2"></div>
               </div>
             ))}
           </div>
         ) : nftPortfolio.length === 0 ? (
           <div className="text-center py-12">
             <div className="text-6xl mb-4">🖼️</div>
-            <p className="text-muted-foreground mb-2">No NFTs found</p> {/* Use theme text */}
-            <p className="text-sm text-muted-foreground/70"> {/* Use theme text */}
+            <p className="text-muted-foreground mb-2">No NFTs found in your connected wallets.</p>
+            <p className="text-sm text-muted-foreground/70">
               {walletAddresses.length === 0 
-                ? "Add a wallet address to view your NFTs"
-                : "Refresh your portfolio or add more wallets"
+                ? "Add a wallet address above to view your NFTs."
+                : "Try refreshing your portfolio or check if your wallets contain NFTs."
               }
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
             {nftPortfolio.map((nft) => (
-              <div
-                key={nft.id}
-                className="bg-card border-border rounded-xl p-4 hover:border-accent/50 transition-all duration-300 group" /* Theme item */
-              >
-                <div className="aspect-square rounded-xl overflow-hidden mb-4 bg-secondary"> {/* Theme image bg */}
-                  <img
-                    src={nft.imageUrl}
-                    alt={`${nft.collectionName} ${nft.tokenId}`}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <h3 className="text-foreground font-semibold truncate">{nft.collectionName}</h3> {/* Use theme text */}
-                  <p className="text-muted-foreground text-sm">{nft.tokenId}</p> {/* Use theme text */}
-                  
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs text-muted-foreground/70">Floor Price</p> {/* Use theme text */}
-                      <p className="text-green-400 font-bold"> {/* Semantic color, keep */}
-                        {nft.floorPrice.toFixed(2)} {nft.currency}
-                      </p>
-                    </div>
-                    <a
-                      href={nft.marketplaceUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="p-2 bg-secondary hover:bg-secondary/80 text-muted-foreground hover:text-accent rounded-lg" /* Themed icon button */
-                    >
-                      <ExternalLink size={16} />
-                    </a>
-                  </div>
-                </div>
-              </div>
+              // Cast nft to the extended type expected by NftCard if NFTItem from context isn't fully updated yet.
+              // The NFTItem in AppContext should now have collectionSlug and blockchain.
+              <NftCard key={nft.id} nft={nft as NFTItem & { collectionSlug: string; blockchain: string; }} />
             ))}
           </div>
         )}

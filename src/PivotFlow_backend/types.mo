@@ -211,4 +211,10 @@ module Types {
         // Optional: For handling streamed responses, if ever needed
         // streaming_strategy : ?StreamingStrategy;
     };
+
+    // Type for CoinGecko price information
+    public type TokenPriceInfo = {
+      id: Text;             // e.g., "ethereum", "solana"
+      current_price: Float; // Price in USD
+    };
 }

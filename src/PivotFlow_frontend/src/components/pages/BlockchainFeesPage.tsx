@@ -178,7 +178,7 @@ export const BlockchainFeesPage: React.FC = () => {
 
       {/* Gas Alert Form */}
       {showGasAlertForm && (
-        <div className="bg-card/70 backdrop-blur-sm border-border rounded-2xl p-6 shadow-2xl"> {/* Use bg-card, border-border */}
+        <div className="bg-card/70 backdrop-blur-sm border-border rounded-2xl p-6 shadow-2xl smooth-appear"> {/* Use bg-card, border-border, ADDED smooth-appear */}
           <h2 className="text-xl font-semibold text-foreground mb-6">Set Gas Alert</h2> {/* Use text-foreground */}
           
           <form onSubmit={handleGasAlertSubmit} className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -247,7 +247,7 @@ export const BlockchainFeesPage: React.FC = () => {
 
       {/* Cost Calculator */}
       {showCostCalculator && (
-        <div className="bg-card/70 backdrop-blur-sm border-border rounded-2xl p-6 shadow-2xl"> {/* Use bg-card, border-border */}
+        <div className="bg-card/70 backdrop-blur-sm border-border rounded-2xl p-6 shadow-2xl smooth-appear"> {/* Use bg-card, border-border, ADDED smooth-appear */}
           <h2 className="text-xl font-semibold text-foreground mb-6">Transaction Cost Calculator</h2> {/* Use text-foreground */}
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

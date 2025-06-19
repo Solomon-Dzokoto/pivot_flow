@@ -23,15 +23,17 @@ export const ErrorToast: React.FC = () => {
 
   return (
     <div className="fixed top-4 right-4 z-50 animate-slide-in-right">
-      <div className="bg-red-900/90 border border-red-500/50 rounded-xl p-4 shadow-2xl backdrop-blur-sm max-w-sm">
+      {/* Uses destructive theme colors for better adaptability */}
+      <div className="bg-destructive/90 dark:bg-destructive/50 border border-destructive/70 dark:border-destructive/30 rounded-xl p-4 shadow-2xl backdrop-blur-sm max-w-sm text-destructive-foreground dark:text-destructive-foreground">
         <div className="flex items-start justify-between">
           <div className="flex items-center space-x-2">
-            <div className="w-2 h-2 bg-red-400 rounded-full animate-pulse"></div>
-            <p className="text-red-100 text-sm font-medium">{errorMessage}</p>
+            {/* Pulse dot can use a slightly lighter shade of destructive or a generic error color */}
+            <div className="w-2 h-2 bg-destructive-foreground/70 dark:bg-destructive-foreground/50 rounded-full animate-pulse"></div>
+            <p className="text-sm font-medium">{errorMessage}</p>
           </div>
           <button
             onClick={() => setError(null)}
-            className="text-red-400 hover:text-red-300 transition-colors ml-2"
+            className="text-destructive-foreground/80 hover:text-destructive-foreground transition-colors ml-2"
           >
             <X size={16} />
           </button>

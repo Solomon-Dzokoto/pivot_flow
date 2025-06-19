@@ -89,7 +89,7 @@ export const NftAlertsPage: React.FC = () => {
 
       {/* Add Alert Form */}
       {showAddForm && (
-        <div className="bg-card/70 backdrop-blur-sm border-border rounded-2xl p-6 shadow-2xl"> {/* Use bg-card, border-border */}
+        <div className="bg-card/70 backdrop-blur-sm border-border rounded-2xl p-6 shadow-2xl smooth-appear"> {/* Use bg-card, border-border, ADDED smooth-appear */}
           <h2 className="text-xl font-semibold text-foreground mb-6">Create NFT Alert</h2> {/* Use text-foreground */}
           
           <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">

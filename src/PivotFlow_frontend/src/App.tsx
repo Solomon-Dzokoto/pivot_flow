@@ -37,11 +37,11 @@ const Navigation: React.FC = () => {
             onClick={() => setCurrentView(id)}
             className={`flex items-center space-x-2 px-4 py-2 rounded-xl font-medium transition-all duration-300 transform hover:scale-105 ${
               currentView === id
-                ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg shadow-cyan-500/25'
-                : 'bg-slate-800/50 text-slate-300 hover:text-white hover:bg-slate-700/70 border border-slate-700/50'
+                ? 'bg-gradient-to-r from-primary to-blue-600 dark:to-blue-500 text-primary-foreground shadow-lg shadow-accent/25' // Use theme colors, ensure good contrast for text-primary-foreground
+                : 'bg-secondary/50 text-muted-foreground hover:text-foreground hover:bg-secondary/80 border border-border/50' // Use theme colors
             }`}
           >
-            <Icon size={18} />
+            <Icon size={18} className={currentView === id ? 'text-primary-foreground' : 'text-muted-foreground group-hover:text-foreground'} /> {/* Ensure icon color matches text */}
             <span className="hidden sm:inline">{label}</span>
           </button>
         ))}
@@ -118,14 +118,14 @@ const AppContent: React.FC = () => {
         <header className="p-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <div className="p-3 bg-gradient-to-r from-cyan-500 to-purple-500 rounded-2xl shadow-lg shadow-cyan-500/25">
-                <Rocket className="w-8 h-8 text-white" />
+              <div className="p-3 bg-gradient-to-r from-primary to-purple-600 dark:to-purple-500 rounded-2xl shadow-lg shadow-accent/25"> {/* Use theme-accent (via primary) */}
+                <Rocket className="w-8 h-8 text-primary-foreground" /> {/* Use themed text */}
               </div>
               <div>
-                <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+                <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-accent via-purple-400 to-pink-400 bg-clip-text text-transparent"> {/* Use theme-accent */}
                   PivotFlow
                 </h1>
-                <p className="text-slate-400 text-sm">
+                <p className="text-muted-foreground text-sm"> {/* Use themed text */}
                   Your mission control for NFT monitoring and cross-chain fee optimization
                 </p>
               </div>

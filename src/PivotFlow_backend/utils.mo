@@ -188,4 +188,26 @@ module Utils {
         
         null
     };
+
+    // JSON utilities
+    public func escapeJsonText(text: Text) : Text {
+        // Basic JSON string escaping for quotes and backslashes.
+        // Does not handle all JSON special characters like \n, \t, etc.
+        // or unicode escapes. Sufficient for this conceptual step.
+        // Order matters: escape backslashes first, then quotes.
+        var result = "";
+        for (char in Text.toIter(text)) {
+            switch (char) {
+                case ('\\') { result := result # "\\\\"; };
+                case ('\"') { result := result # "\\\""; };
+                // case ('\n') { result := result # "\\n"; }; // Optional: handle newlines
+                // case ('\r') { result := result # "\\r"; }; // Optional: handle carriage returns
+                // case ('\t') { result := result # "\\t"; }; // Optional: handle tabs
+                // case ('\u{0008}') { result := result # "\\b"; }; // Optional: handle backspace (BS)
+                // case ('\u{000C}') { result := result # "\\f"; }; // Optional: handle form feed (FF)
+                case (_) { result := result # Char.toText(char); };
+            };
+        };
+        result
+    };
 }

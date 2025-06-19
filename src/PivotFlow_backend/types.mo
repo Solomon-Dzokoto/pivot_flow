@@ -171,4 +171,50 @@ module Types {
         blockchain: ?Text;
         timestamp: Time;
     };
+
+    // HTTP Types for Internet Computer outcalls
+    // Based on mo:base/ExperimentalInternetComputer.Http
+
+    public type HttpHeader = {
+        name: Text;
+        value: Text;
+    };
+
+    // HttpRequest type for IC http_request calls
+    // The `transform` function signature is simplified here.
+    // It directly expects a function that processes HttpResponse and returns the desired type,
+    // rather than a context object with a function name.
+    public type HttpRequest = {
+        url: Text;
+        method: Text; // "GET", "POST", etc.
+        headers: [HttpHeader];
+        body: ?Blob; // Optional body
+        // The transform function itself, not a context.
+        // The actual type of 'a depends on what the transform function is supposed to return.
+        // For the floor price, it would be async ?Float.
+        // However, the system http_request type expects a specific structure for transform.
+        // Let's align with the common IC definition for the transform field.
+        transform: ?{
+            function: (HttpResponse) -> async HttpResponse; // This is standard
+            context: ?Blob;
+        };
+        // Optional: Fields for controlling HTTP outcalls specific to IC
+        // max_response_bytes : ?Nat64;
+        // certificate_version : ?Nat16; // For certified data, if needed by API
+    };
+
+    // HttpResponse type from an IC http_request call
+    public type HttpResponse = {
+        status: Nat; // e.g., 200, 404
+        headers: [HttpHeader];
+        body: Blob;
+        // Optional: For handling streamed responses, if ever needed
+        // streaming_strategy : ?StreamingStrategy;
+    };
+
+    // Type for CoinGecko price information
+    public type TokenPriceInfo = {
+      id: Text;             // e.g., "ethereum", "solana"
+      current_price: Float; // Price in USD
+    };
 }

@@ -9,14 +9,18 @@ export default {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['Inter', 'system-ui', 'sans-serif'],
+      },
       borderRadius: {
         lg: 'var(--radius)',
         md: 'calc(var(--radius) - 2px)',
         sm: 'calc(var(--radius) - 4px)',
       },
       colors: {
-        background: 'hsl(var(--background))',
-        foreground: 'hsl(var(--foreground))',
+        // Existing HSL-based colors (likely for theming system)
+        background: 'hsl(var(--background))', // This will likely be overridden by dark theme's primary in index.css
+        foreground: 'hsl(var(--foreground))', // Default text color, will be overridden
         card: {
           DEFAULT: 'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))',
@@ -25,6 +29,28 @@ export default {
           DEFAULT: 'hsl(var(--popover))',
           foreground: 'hsl(var(--popover-foreground))',
         },
+        // primary, secondary, accent HSL might be for dynamic theming.
+        // We are defining our own concrete dark theme palette here.
+        // If the HSL vars --primary, --secondary, --accent are updated for dark mode elsewhere (e.g. in index.css via :root or .dark),
+        // then these Tailwind definitions would pick them up.
+        // For now, let's define our specific dark theme colors directly.
+        // It's also possible these HSLs are intended to be replaced by our dark theme.
+
+        // Dark Theme Palette
+        'theme-primary': '#0F172A', // slate-900
+        'theme-secondary': '#1E293B', // slate-800
+        'theme-accent': '#00FFFF', // Cyan / Electric Blue (example)
+        'theme-glow-start': '#00FFFF', // Accent color for glow
+        'theme-glow-end': '#00A3FF', // A slightly different shade for glow gradient (example: lighter blue)
+        'theme-text': '#CBD5E1', // slate-300 for general text
+        'theme-text-muted': '#94A3B8', // slate-400 for muted text
+
+        // Overriding or supplementing existing color names if needed,
+        // or use the new names like 'theme-primary'.
+        // For clarity, using new names. The HSL vars are likely for shadcn/ui's default light/dark theming.
+        // We will set the actual CSS vars for --background, --foreground etc. in index.css for the dark theme.
+
+        // Existing HSL-based color definitions from the original file:
         primary: {
           DEFAULT: 'hsl(var(--primary))',
           foreground: 'hsl(var(--primary-foreground))',

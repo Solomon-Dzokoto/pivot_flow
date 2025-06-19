@@ -69,8 +69,10 @@ export interface CanisterService extends _SERVICE {
   getNetworkFees: () => Promise<NetworkFee[]>;
   getCycles: () => Promise<bigint>;
   health: () => Promise<boolean>;
-
-
+  getCanisterMemoryUsage: () => Promise<bigint>; // Nat becomes bigint
+  getICPPrice: () => Promise<[] | [number]>; // ?Float becomes an optional array with one number
+  getAltcoinPrices: (tokenIds: string[]) => Promise<[] | Array<{id: string; current_price: number}>>; // ?[TokenPriceInfo]
+  getNftFloorPrice: (collectionSlug: string, blockchain: string) => Promise<[] | [number]>; // ?Float for NFT floor price
 }
 
 export class CanisterClient {
@@ -231,6 +233,43 @@ export class CanisterClient {
   public async health() {
     if (!this.actor) throw new Error('Actor not initialized');
     return await this.actor.health();
+  }
+
+  public async getCanisterMemoryUsage(): Promise<bigint> {
+    if (!this.actor) throw new Error('Actor not initialized');
+    return this.actor.getCanisterMemoryUsage();
+  }
+
+  public async getICPPrice(): Promise<number | null> {
+    if (!this.actor) throw new Error('Actor not initialized');
+    const result = await this.actor.getICPPrice();
+    return result.length > 0 ? result[0] : null;
+  }
+
+  public async getAltcoinPrices(tokenIds: string[]): Promise<Array<{id: string; current_price: number}> | null> {
+    if (!this.actor) throw new Error('Actor not initialized');
+    const result = await this.actor.getAltcoinPrices(tokenIds);
+    // Motoko ?[TokenPriceInfo] returns an array, which could be empty if the option was null,
+    // or an array containing another array of TokenPriceInfo if the option was Some.
+    // The candid interface for ?T is Vec<T>, which is an array. If T is an array, it's Vec<Vec<X>>.
+    // If backend returns ?[TokenPriceInfo] (i.e. Option<Array<TokenPriceInfo>>):
+    // - null (None) becomes `[]` (empty array) at the candid layer.
+    // - Some([item1, item2]) becomes `[[item1, item2]]` (array containing one array) at the candid layer.
+    // So, `result` will be `[]` if backend returned `null`, or `[actualArray]` if backend returned `?actualArray`.
+    if (result.length === 0) { // This means backend returned null
+      return null;
+    }
+    return result[0]; // This is the actualArray: Array<{id: string; current_price: number}>
+  }
+
+  public async getNftFloorPrice(collectionSlug: string, blockchain: string): Promise<number | null> {
+    if (!this.actor) throw new Error('Actor not initialized');
+    const result = await this.actor.getNftFloorPrice(collectionSlug, blockchain);
+    // ?Float from Motoko is represented as [] | [number] in Candid/JS
+    if (result.length === 0) { // This means backend returned null (None)
+      return null;
+    }
+    return result[0]; // This is the actual price: number
   }
 }
 
